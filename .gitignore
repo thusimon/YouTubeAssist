@@ -191,4 +191,4 @@ StyleCop.Cache
 bin
 obj
 .vs
-
+App.Secrets.config

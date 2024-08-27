@@ -7,6 +7,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="175,138,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
+            <Label x:Name="search_label" Content="Channel Handle:" />
+            <TextBox x:Name="search_textBox" AutomationProperties.LabeledBy="{Binding ElementName=search_label}" TextWrapping="Wrap" Text="" Width="100"/>
+            <Button x:Name="search_button" Content="_Search" Click="Search_button_Click" />
+        </StackPanel>
     </Grid>
 </UserControl>
