@@ -68,7 +68,7 @@ namespace YouTubeAssist.API
             return result;
         }
 
-        public async Task<Tuple<List<string>, List<ulong>>> SearchChannel(string username)
+        public async Task<Tuple<List<string>, List<ulong>>?> SearchChannel(string username)
         {
             ChannelsResource.ListRequest channelListRequest = service.Channels.List("snippet,contentDetails,statistics");
             channelListRequest.ForHandle = username;
@@ -78,18 +78,17 @@ namespace YouTubeAssist.API
 
             if (channelListResponse == null || channelListResponse.Items == null)
             {
-                return Tuple.Create(new List<string>(), new List<ulong>());
+                return null;
             }
 
             Google.Apis.YouTube.v3.Data.Channel channelResult = channelListResponse.Items[0];
             if (channelResult == null)
             {
-                return Tuple.Create(new List<string>(), new List<ulong>());
+                return null;
             }
             List<string> info = new List<string>() {
                 channelResult.Id,
                 channelResult.Snippet.Title,
-                channelResult.Snippet.Country,
                 channelResult.Snippet.Description,
                 channelResult.Snippet.CustomUrl,
                 channelResult.Snippet.Thumbnails.Default__.Url.ToLower(),

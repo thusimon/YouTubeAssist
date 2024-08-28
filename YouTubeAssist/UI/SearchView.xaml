@@ -14,8 +14,11 @@
 
         <StackPanel Grid.Column="0">
             <Label x:Name="search_label" Content="Channel Handle:" />
-            <TextBox x:Name="search_textBox" AutomationProperties.LabeledBy="{Binding ElementName=search_label}" TextWrapping="Wrap" Text="" Width="100"/>
-            <Button x:Name="search_button" Content="_Search" Click="Search_button_Click" />
+            <TextBox x:Name="search_textBox" Style="{StaticResource BaseTextBoxStyle}" AutomationProperties.LabeledBy="{Binding ElementName=search_label}" TextWrapping="Wrap" Text="" HorizontalAlignment="Center" Width="150"/>
+            <Button x:Name="search_button" Style="{StaticResource BaseButtonStyle}" Content="_Search" Click="Search_button_Click" HorizontalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            
         </StackPanel>
     </Grid>
 </UserControl>
