@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,11 +22,12 @@ namespace YouTubeAssist.UI
     /// <summary>
     /// Interaction logic for SearchView.xaml
     /// </summary>
-    public partial class SearchView : UserControl
+    public partial class SearchView : UserControl, INotifyPropertyChanged
     {
         YouTubeAPI youTubeAPI;
         int searchStatus; // -1: no result; 0: searching; 1: has result
         Tuple<List<string>, List<ulong>>? searchResult;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public SearchView()
         {
@@ -34,6 +37,11 @@ namespace YouTubeAssist.UI
             searchResult = null;
         }
 
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
         public async void Search_button_Click(object sender, RoutedEventArgs e)
         {
             searchStatus = 0;
@@ -41,7 +49,7 @@ namespace YouTubeAssist.UI
             string handle = search_textBox.Text;
             searchResult = await youTubeAPI.SearchChannel(handle);
             search_textBox.IsReadOnly = false;
-            searchStatus = searchResult == null ? -1 : 1;
+            SearchStatus = searchResult == null ? -1 : 1;
         }
 
         public int SearchStatus
@@ -50,13 +58,22 @@ namespace YouTubeAssist.UI
             { 
                 return searchStatus;
             }
+            set
+            {
+                searchStatus = value;
+                OnPropertyChanged();
+            }
         }
 
         public string ChannelID
         {
             get
             {
-                return searchResult?.Item1?[0] ?? ""; 
+                return searchResult?.Item1?[0] ?? "TEMP";
+            }
+            set
+            {
+                OnPropertyChanged();
             }
         }
 

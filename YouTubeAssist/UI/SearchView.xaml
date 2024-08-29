@@ -6,6 +6,19 @@
              xmlns:local="clr-namespace:YouTubeAssist.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="NoResultTemplate">
+            <local:NoResult />
+        </DataTemplate>
+        <DataTemplate x:Key="HasResultTemplate">
+            <StackPanel>
+                <Label x:Name="ChannelID_Label" Content="ChannelID" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelID_Label}" Text="{Binding Path=(local:SearchView.ChannelID)}" IsReadOnly="True" MinWidth="100" />
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -18,7 +31,24 @@
             <Button x:Name="search_button" Style="{StaticResource BaseButtonStyle}" Content="_Search" Click="Search_button_Click" HorizontalAlignment="Center" />
         </StackPanel>
         <StackPanel Grid.Column="1">
-            
+            <ContentControl Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SearchStatus}" Value="-1">
+                                <Setter Property="ContentTemplate" Value="{StaticResource NoResultTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SearchStatus}" Value="1">
+                                <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SearchStatus}" Value="0">
+                                <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
         </StackPanel>
     </Grid>
 </UserControl>
