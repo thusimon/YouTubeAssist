@@ -31,18 +31,18 @@
             <Button x:Name="search_button" Style="{StaticResource BaseButtonStyle}" Content="_Search" Click="Search_button_Click" HorizontalAlignment="Center" />
         </StackPanel>
         <StackPanel Grid.Column="1">
-            <ContentControl Content="{Binding}">
+            <ContentControl>
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
                         <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding SearchStatus}" Value="-1">
+                            <DataTrigger Binding="{Binding Path=SearchStatus}" Value="-1">
                                 <Setter Property="ContentTemplate" Value="{StaticResource NoResultTemplate}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding SearchStatus}" Value="1">
+                            <DataTrigger Binding="{Binding Path=SearchStatus}" Value="1">
                                 <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding SearchStatus}" Value="0">
+                            <DataTrigger Binding="{Binding Path=SearchStatus}" Value="0">
                                 <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
                             </DataTrigger>
                         </Style.Triggers>

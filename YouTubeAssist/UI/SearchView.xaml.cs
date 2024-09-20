@@ -33,8 +33,9 @@ namespace YouTubeAssist.UI
         {
             InitializeComponent();
             youTubeAPI = new YouTubeAPI();
-            searchStatus = -1;
+            searchStatus = 1;
             searchResult = null;
+            DataContext = this;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
