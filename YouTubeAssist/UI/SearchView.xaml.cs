@@ -26,7 +26,9 @@ namespace YouTubeAssist.UI
     {
         YouTubeAPI youTubeAPI;
         int searchStatus; // -1: no result; 0: searching; 1: has result
-        Tuple<List<string>, List<ulong>>? searchResult;
+        Channel? channelResult;
+        string _channelId;
+        string _channelTitle;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public SearchView()
@@ -34,7 +36,7 @@ namespace YouTubeAssist.UI
             InitializeComponent();
             youTubeAPI = new YouTubeAPI();
             searchStatus = 1;
-            searchResult = null;
+            channelResult = null;
             DataContext = this;
         }
 
@@ -45,12 +47,16 @@ namespace YouTubeAssist.UI
 
         public async void Search_button_Click(object sender, RoutedEventArgs e)
         {
-            searchStatus = 0;
+            SearchStatus = 0;
             search_textBox.IsReadOnly = true;
             string handle = search_textBox.Text;
-            searchResult = await youTubeAPI.SearchChannel(handle);
+            channelResult = await youTubeAPI.SearchChannel(handle);
             search_textBox.IsReadOnly = false;
-            SearchStatus = searchResult == null ? -1 : 1;
+            SearchStatus = channelResult == null ? -1 : 1;
+            if (channelResult != null) { 
+                ChannelID = channelResult.ID;
+                ChannelTitle = channelResult.Title;
+            }
         }
 
         public int SearchStatus
@@ -70,10 +76,11 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item1?[0] ?? "TEMP";
+                return _channelId;
             }
             set
             {
+                _channelId = value;
                 OnPropertyChanged();
             }
         }
@@ -82,7 +89,12 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item1?[1] ?? "";
+                return _channelTitle;
+            }
+            set
+            {
+                _channelTitle = value;
+                OnPropertyChanged();
             }
         }
 
@@ -90,7 +102,7 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item1?[2] ?? "";
+                return channelResult!.Description;
             }
         }
 
@@ -98,15 +110,15 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item1?[3] ?? "";
+                return "https://www.youtube.com/" + channelResult!.CustomUrl;
             }
         }
 
-        public string ChannelIcon
+        public string ChannelThumbUrl
         {
             get
             {
-                return searchResult?.Item1?[4] ?? "";
+                return channelResult!.ThumbUrl;
             }
         }
 
@@ -114,7 +126,7 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item2?[0] ?? 0;
+                return channelResult!.ViewCount;
             }
         }
 
@@ -122,7 +134,7 @@ namespace YouTubeAssist.UI
         {
             get
             {
-                return searchResult?.Item2?[1] ?? 0;
+                return channelResult!.VideoCount;
             }
         }
     }

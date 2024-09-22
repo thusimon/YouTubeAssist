@@ -68,10 +68,10 @@ namespace YouTubeAssist.API
             return result;
         }
 
-        public async Task<Tuple<List<string>, List<ulong>>?> SearchChannel(string username)
+        public async Task<Channel?> SearchChannel(string handleName)
         {
             ChannelsResource.ListRequest channelListRequest = service.Channels.List("snippet,contentDetails,statistics");
-            channelListRequest.ForHandle = username;
+            channelListRequest.ForHandle = handleName;
             channelListRequest.MaxResults = 1;
 
             ChannelListResponse channelListResponse = await channelListRequest.ExecuteAsync();
@@ -86,18 +86,13 @@ namespace YouTubeAssist.API
             {
                 return null;
             }
-            List<string> info = new List<string>() {
-                channelResult.Id,
+            return new Channel(channelResult.Id,
                 channelResult.Snippet.Title,
                 channelResult.Snippet.Description,
                 channelResult.Snippet.CustomUrl,
                 channelResult.Snippet.Thumbnails.Default__.Url.ToLower(),
-            };
-            List<ulong> statistics = new List<ulong>() {
-                channelResult.Statistics.ViewCount??0,
-                channelResult.Statistics.VideoCount??0
-            };
-            return Tuple.Create(info, statistics);
+                channelResult.Statistics.ViewCount ?? 0,
+                channelResult.Statistics.VideoCount ?? 0);
         }
 
     }

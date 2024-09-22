@@ -11,10 +11,15 @@
         <DataTemplate x:Key="NoResultTemplate">
             <local:NoResult />
         </DataTemplate>
+        <DataTemplate x:Key="LoadingTemplate">
+            <local:Loading />
+        </DataTemplate>
         <DataTemplate x:Key="HasResultTemplate">
             <StackPanel>
-                <Label x:Name="ChannelID_Label" Content="ChannelID" />
+                <Label x:Name="ChannelID_Label" Content="Channel ID" />
                 <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelID_Label}" Text="{Binding Path=(local:SearchView.ChannelID)}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelTitle_Label" Content="Channel Title" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelTitle_Label}" Text="{Binding Path=(local:SearchView.ChannelTitle)}" IsReadOnly="True" MinWidth="100" />
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
@@ -43,7 +48,7 @@
                                 <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=SearchStatus}" Value="0">
-                                <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
+                                <Setter Property="ContentTemplate" Value="{StaticResource LoadingTemplate}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

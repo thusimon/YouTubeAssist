@@ -2,4 +2,5 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <BitmapImage x:Key="WinIcon" UriSource="pack://application:,,,/Assets/Images/icon_256x256.ico"/>
     <BitmapImage x:Key="NoResultImg" UriSource="pack://application:,,,/Assets/Images/no_result_256.png"/>
+    <BitmapImage x:Key="LoadingImg" UriSource="pack://application:,,,/Assets/Images/loading_200.png"/>
 </ResourceDictionary>
