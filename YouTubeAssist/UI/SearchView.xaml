@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:YouTubeAssist.UI"
+             xmlns:localUtils="clr-namespace:YouTubeAssist.UI.Utils"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <localUtils:NullConverter x:Key="UINullConverter" />
         <DataTemplate x:Key="NoResultTemplate">
             <local:NoResult />
         </DataTemplate>
@@ -15,11 +17,23 @@
             <local:Loading />
         </DataTemplate>
         <DataTemplate x:Key="HasResultTemplate">
-            <StackPanel>
+            <StackPanel Orientation="Vertical">
                 <Label x:Name="ChannelID_Label" Content="Channel ID" />
-                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelID_Label}" Text="{Binding Path=(local:SearchView.ChannelID)}" IsReadOnly="True" MinWidth="100" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelID_Label}" Text="{Binding Path=ID}" IsReadOnly="True" MinWidth="100" />
                 <Label x:Name="ChannelTitle_Label" Content="Channel Title" />
-                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelTitle_Label}" Text="{Binding Path=(local:SearchView.ChannelTitle)}" IsReadOnly="True" MinWidth="100" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelTitle_Label}" Text="{Binding Path=Title}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelDescription_Label" Content="Channel Description" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelDescription_Label}" Text="{Binding Path=Description}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelCustomUrl_Label" Content="Channel Url" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelCustomUrl_Label}" Text="{Binding Path=CustomUrl, Converter={StaticResource UINullConverter}}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelThumbUrl_Label" Content="Channel ThumbUrl" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelThumbUrl_Label}" Text="{Binding Path=ThumbUrl, Converter={StaticResource UINullConverter}}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelCreateDate_Label" Content="Channel Create Date" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelCreateDate_Label}" Text="{Binding Path=Date}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelViewCount_Label" Content="Channel View Count" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelViewCount_Label}" Text="{Binding Path=ViewCount}" IsReadOnly="True" MinWidth="100" />
+                <Label x:Name="ChannelVideoCount_Label" Content="Channel Video Count" />
+                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=ChannelVideoCount_Label}" Text="{Binding Path=VideoCount}" IsReadOnly="True" MinWidth="100" />
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
@@ -46,6 +60,7 @@
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=SearchStatus}" Value="1">
                                 <Setter Property="ContentTemplate" Value="{StaticResource HasResultTemplate}" />
+                                <Setter Property="Content" Value="{Binding Path=Channel}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=SearchStatus}" Value="0">
                                 <Setter Property="ContentTemplate" Value="{StaticResource LoadingTemplate}" />

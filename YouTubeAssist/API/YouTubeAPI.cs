@@ -13,6 +13,7 @@ using Google.Apis.Upload;
 using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
+using Newtonsoft.Json.Serialization;
 
 namespace YouTubeAssist.API
 {
@@ -86,13 +87,40 @@ namespace YouTubeAssist.API
             {
                 return null;
             }
-            return new Channel(channelResult.Id,
+
+            Uri? customeUrl = null;
+            try
+            {
+                string customeUrlResult = channelResult.Snippet.CustomUrl;
+                if (!customeUrlResult.StartsWith("http"))
+                {
+                    customeUrl = new Uri("https://www.youtube.com/" + customeUrlResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("failed to convert customeUrl to Uri", ex);
+            }
+
+            Uri? thumbUrl = null;
+            try
+            {
+                thumbUrl = new Uri(channelResult.Snippet.Thumbnails.Default__.Url);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("failed to convert thumbUrl to Uri", ex);
+            }
+
+            Channel channel = new Channel(channelResult.Id,
                 channelResult.Snippet.Title,
                 channelResult.Snippet.Description,
-                channelResult.Snippet.CustomUrl,
-                channelResult.Snippet.Thumbnails.Default__.Url.ToLower(),
+                customeUrl,
+                thumbUrl,
                 channelResult.Statistics.ViewCount ?? 0,
                 channelResult.Statistics.VideoCount ?? 0);
+            channel.Date = channelResult.Snippet.PublishedAtDateTimeOffset;
+            return channel;
         }
 
     }

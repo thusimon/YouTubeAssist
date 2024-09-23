@@ -7,20 +7,14 @@ using System.Threading.Tasks;
 
 namespace YouTubeAssist.API
 {
-    //channelResult.Id,
-    //            channelResult.Snippet.Title,
-    //            channelResult.Snippet.Description,
-    //            channelResult.Snippet.CustomUrl,
-    //            channelResult.Snippet.Thumbnails.Default__.Url.ToLower(),
-    //channelResult.Statistics.ViewCount??0,
-    //            channelResult.Statistics.VideoCount??0
     public class Channel
     {
         private string? _id;
         private string? _title;
         private string? _description;
-        private string? _customeUrl;
-        private string? _thumbUrl;
+        private Uri? _customeUrl;
+        private Uri? _thumbUrl;
+        private DateTimeOffset? _date;
         private ulong _viewCount;
         private ulong _videoCount;
 
@@ -36,13 +30,17 @@ namespace YouTubeAssist.API
             get { return _description ?? "--"; }
             set { _description = value; }
         }
-        public string CustomUrl {
-            get { return _customeUrl ?? "--"; }
+        public Uri? CustomUrl {
+            get { return _customeUrl; }
             set { _customeUrl = value; }
         }
-        public string ThumbUrl {
-            get { return _thumbUrl ?? "--"; }
+        public Uri? ThumbUrl {
+            get { return _thumbUrl; }
             set { _thumbUrl = value; }
+        }
+        public DateTimeOffset? Date {
+            get { return _date; }
+            set { _date = value; }
         }
         public ulong ViewCount {
             get { return _viewCount; }
@@ -53,7 +51,13 @@ namespace YouTubeAssist.API
             set { _videoCount = value; }
         }
 
-        public Channel(string? id = null, string? title = null, string? description = null, string? customeUrl = null, string? thumbUrl = null, ulong viewCount = 0, ulong videoCount = 0)
+        public Channel(string? id = null,
+            string? title = null,
+            string? description = null,
+            Uri? customeUrl = null, Uri?
+            thumbUrl = null,
+            ulong viewCount = 0,
+            ulong videoCount = 0)
         {
             _id = id;
             _title = title;

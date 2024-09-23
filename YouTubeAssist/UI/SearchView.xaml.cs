@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace YouTubeAssist.UI
     {
         YouTubeAPI youTubeAPI;
         int searchStatus; // -1: no result; 0: searching; 1: has result
-        Channel? channelResult;
+        Channel channel;
         string _channelId;
         string _channelTitle;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -36,7 +37,7 @@ namespace YouTubeAssist.UI
             InitializeComponent();
             youTubeAPI = new YouTubeAPI();
             searchStatus = 1;
-            channelResult = null;
+            channel = new Channel();
             DataContext = this;
         }
 
@@ -50,12 +51,15 @@ namespace YouTubeAssist.UI
             SearchStatus = 0;
             search_textBox.IsReadOnly = true;
             string handle = search_textBox.Text;
-            channelResult = await youTubeAPI.SearchChannel(handle);
+            Channel? channel = await youTubeAPI.SearchChannel(handle);
             search_textBox.IsReadOnly = false;
-            SearchStatus = channelResult == null ? -1 : 1;
-            if (channelResult != null) { 
-                ChannelID = channelResult.ID;
-                ChannelTitle = channelResult.Title;
+            SearchStatus = channel == null ? -1 : 1;
+            if (channel != null) {
+                Channel = channel;
+            }
+            else
+            {
+                Channel = new Channel();
             }
         }
 
@@ -72,6 +76,18 @@ namespace YouTubeAssist.UI
             }
         }
 
+        public Channel Channel
+        {
+            get
+            {
+                return channel;
+            }
+            set
+            {
+                channel = value;
+                OnPropertyChanged();
+            }
+        }
         public string ChannelID
         {
             get
@@ -98,44 +114,44 @@ namespace YouTubeAssist.UI
             }
         }
 
-        public string ChannelDescription
-        {
-            get
-            {
-                return channelResult!.Description;
-            }
-        }
+        //public string ChannelDescription
+        //{
+        //    get
+        //    {
+        //        return channelResult!.Description;
+        //    }
+        //}
 
-        public string ChannelUrl
-        {
-            get
-            {
-                return "https://www.youtube.com/" + channelResult!.CustomUrl;
-            }
-        }
+        //public string ChannelUrl
+        //{
+        //    get
+        //    {
+        //        return "https://www.youtube.com/" + channelResult!.CustomUrl;
+        //    }
+        //}
 
-        public string ChannelThumbUrl
-        {
-            get
-            {
-                return channelResult!.ThumbUrl;
-            }
-        }
+        //public string ChannelThumbUrl
+        //{
+        //    get
+        //    {
+        //        return channelResult!.ThumbUrl;
+        //    }
+        //}
 
-        public ulong ChannelViewCount
-        {
-            get
-            {
-                return channelResult!.ViewCount;
-            }
-        }
+        //public ulong ChannelViewCount
+        //{
+        //    get
+        //    {
+        //        return channelResult!.ViewCount;
+        //    }
+        //}
 
-        public ulong ChannelVideoCount
-        {
-            get
-            {
-                return channelResult!.VideoCount;
-            }
-        }
+        //public ulong ChannelVideoCount
+        //{
+        //    get
+        //    {
+        //        return channelResult!.VideoCount;
+        //    }
+        //}
     }
 }
