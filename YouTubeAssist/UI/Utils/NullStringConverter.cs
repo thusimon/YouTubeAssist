@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 namespace YouTubeAssist.UI.Utils
 {
-    public class NullConverter : IValueConverter
+    public class NullStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

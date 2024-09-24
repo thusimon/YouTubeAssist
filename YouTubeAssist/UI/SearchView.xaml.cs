@@ -46,27 +46,10 @@ namespace YouTubeAssist.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public async void Search_button_Click(object sender, RoutedEventArgs e)
-        {
-            SearchStatus = 0;
-            search_textBox.IsReadOnly = true;
-            string handle = search_textBox.Text;
-            Channel? channel = await youTubeAPI.SearchChannel(handle);
-            search_textBox.IsReadOnly = false;
-            SearchStatus = channel == null ? -1 : 1;
-            if (channel != null) {
-                Channel = channel;
-            }
-            else
-            {
-                Channel = new Channel();
-            }
-        }
-
         public int SearchStatus
-        { 
+        {
             get
-            { 
+            {
                 return searchStatus;
             }
             set
@@ -88,70 +71,27 @@ namespace YouTubeAssist.UI
                 OnPropertyChanged();
             }
         }
-        public string ChannelID
+
+        public async void Search_button_Click(object sender, RoutedEventArgs e)
         {
-            get
-            {
-                return _channelId;
+            SearchStatus = 0;
+            search_textBox.IsReadOnly = true;
+            string handle = search_textBox.Text;
+            Channel? channel = await youTubeAPI.SearchChannel(handle);
+            search_textBox.IsReadOnly = false;
+            SearchStatus = channel == null ? -1 : 1;
+            if (channel != null) {
+                Channel = channel;
             }
-            set
+            else
             {
-                _channelId = value;
-                OnPropertyChanged();
+                Channel = new Channel();
             }
         }
 
-        public string ChannelTitle
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            get
-            {
-                return _channelTitle;
-            }
-            set
-            {
-                _channelTitle = value;
-                OnPropertyChanged();
-            }
+
         }
-
-        //public string ChannelDescription
-        //{
-        //    get
-        //    {
-        //        return channelResult!.Description;
-        //    }
-        //}
-
-        //public string ChannelUrl
-        //{
-        //    get
-        //    {
-        //        return "https://www.youtube.com/" + channelResult!.CustomUrl;
-        //    }
-        //}
-
-        //public string ChannelThumbUrl
-        //{
-        //    get
-        //    {
-        //        return channelResult!.ThumbUrl;
-        //    }
-        //}
-
-        //public ulong ChannelViewCount
-        //{
-        //    get
-        //    {
-        //        return channelResult!.ViewCount;
-        //    }
-        //}
-
-        //public ulong ChannelVideoCount
-        //{
-        //    get
-        //    {
-        //        return channelResult!.VideoCount;
-        //    }
-        //}
     }
 }

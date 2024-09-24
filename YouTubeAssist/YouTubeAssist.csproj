@@ -13,6 +13,7 @@
     <None Remove="Assets\Images\icon_256x256.ico" />
     <None Remove="Assets\Images\loading_200.png" />
     <None Remove="Assets\Images\no_result_256.png" />
+    <None Remove="Assets\Images\profile_holder_350.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +30,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\no_result_256.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\profile_holder_350.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
