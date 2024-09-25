@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using YouTubeAssist.API;
+using YouTubeAssist.Services;
 using YouTubeAssist.UI;
 
 namespace YouTubeAssist
@@ -29,6 +30,8 @@ namespace YouTubeAssist
             notificationsView = new NotificationsView();
             aboutView = new AboutView();
             MainContentControl.Content = searchView;
+
+            //PipeServer pipeServer = new PipeServer();
         }
 
         private void Search_MenuItem_Click(object sender, RoutedEventArgs e)
