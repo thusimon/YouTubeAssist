@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Serialization;
+using System.Diagnostics;
 
 namespace YouTubeAssist.Services
 {
@@ -17,8 +19,8 @@ namespace YouTubeAssist.Services
             int i;
             Thread?[] servers = new Thread[numThreads];
 
-            Console.WriteLine("\n*** Named pipe server stream with impersonation example ***\n");
-            Console.WriteLine("Waiting for client connect...\n");
+            Debug.WriteLine("\n*** Named pipe server stream with impersonation example ***\n");
+            Debug.WriteLine("Waiting for client connect...\n");
             for (i = 0; i < numThreads; i++)
             {
                 servers[i] = new Thread(ServerThread);
@@ -40,7 +42,7 @@ namespace YouTubeAssist.Services
             //        }
             //    }
             //}
-            Console.WriteLine("\nServer thread created.");
+            Debug.WriteLine("\nServer thread created.");
         }
 
         private static void ServerThread(object? data)
@@ -53,7 +55,7 @@ namespace YouTubeAssist.Services
             // Wait for a client to connect
             pipeServer.WaitForConnection();
 
-            Console.WriteLine("Client connected on thread[{0}].", threadId);
+            Debug.WriteLine("Client connected on thread[{0}].", threadId);
             try
             {
                 // Read the request from the client. Once the client has
@@ -71,7 +73,7 @@ namespace YouTubeAssist.Services
                 //MessageHandler messageHandler = new MessageHandler(ss);
 
                 // Display the name of the user we are impersonating.
-                Console.WriteLine("Get message: {0} on thread[{1}] as user: {2}.",
+                Debug.WriteLine("Get message: {0} on thread[{1}] as user: {2}.",
                     message, threadId, pipeServer.GetImpersonationUserName());
 
                 ss.WriteString(String.Format("Forwarded from server pipe: {0}", message));
@@ -81,7 +83,7 @@ namespace YouTubeAssist.Services
             // or disconnected.
             catch (IOException e)
             {
-                Console.WriteLine("ERROR: {0}", e.Message);
+                Debug.WriteLine("ERROR: {0}", e.Message);
             }
             pipeServer.Close();
         }

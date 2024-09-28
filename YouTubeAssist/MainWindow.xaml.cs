@@ -31,7 +31,7 @@ namespace YouTubeAssist
             aboutView = new AboutView();
             MainContentControl.Content = searchView;
 
-            //PipeServer pipeServer = new PipeServer();
+            PipeServer pipeServer = new PipeServer();
         }
 
         private void Search_MenuItem_Click(object sender, RoutedEventArgs e)
