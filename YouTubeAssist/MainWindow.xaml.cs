@@ -22,6 +22,7 @@ namespace YouTubeAssist
         SearchView searchView;
         NotificationsView notificationsView;
         AboutView aboutView;
+        PipeView pipeView;
 
         public MainWindow()
         {
@@ -29,9 +30,8 @@ namespace YouTubeAssist
             searchView = new SearchView();
             notificationsView = new NotificationsView();
             aboutView = new AboutView();
-            MainContentControl.Content = searchView;
-
-            PipeServer pipeServer = new PipeServer();
+            pipeView = new PipeView();
+            MainContentControl.Content = pipeView;
         }
 
         private void Search_MenuItem_Click(object sender, RoutedEventArgs e)

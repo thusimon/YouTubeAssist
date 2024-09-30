@@ -17,12 +17,16 @@ namespace ClientHost
             streamEncoding = new UnicodeEncoding();
         }
 
-        public string ReadString()
+        public string? ReadString()
         {
-            int len;
-            len = ioStream.ReadByte() * 256;
+            int len = 0;
+            int byteRead = ioStream.ReadByte();
+            if (byteRead == -1)
+            {
+                return null;
+            }
             len += ioStream.ReadByte();
-            var inBuffer = new byte[len];
+            byte[] inBuffer = new byte[len];
             ioStream.Read(inBuffer, 0, len);
 
             return streamEncoding.GetString(inBuffer);
