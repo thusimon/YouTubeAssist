@@ -118,6 +118,7 @@ namespace YouTubeAssist.Services
                 {
                     string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Debug.WriteLine("Received from client: " + input);
+                    pipeView.MessageIncome += "\nReceived message from Client:" + input + '\n';
 
                     // Send a response (optional)
                     string response = "Received input: " + input;
