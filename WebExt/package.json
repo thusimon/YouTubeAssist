@@ -1,0 +1,15 @@
+{
+  "name": "WebExt",
+  "version": "0.0.1",
+  "packageManager": "yarn@4.5.0",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "esbuild-plugin-copy": "^2.1.1"
+  },
+  "scripts": {
+    "build": "esbuild src/popup/popup.ts --bundle --outfile=build/popup/popup.js"
+  }
+}

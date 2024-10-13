@@ -84,22 +84,24 @@ Console.WriteLine("Running r/w PipeStream tasks");
 
 static void ReadData(object pipeClientObj)
 {
-    NamedPipeClientStream pipeClient = (NamedPipeClientStream)pipeClientObj;
-    while (true)
-    {
-        string input = Console.ReadLine();
-        byte[] data = Encoding.UTF8.GetBytes(input);
-        pipeClient.Write(data, 0, data.Length);
-    }
-
-    //byte[] buffer = new byte[1024];
-    //int bytesRead;
-
-    //while ((bytesRead = pipeClient.Read(buffer, 0, buffer.Length)) > 0)
+    //NamedPipeClientStream pipeClient = (NamedPipeClientStream)pipeClientObj;
+    //while (true)
     //{
-    //    // Process the received data
-    //    Console.WriteLine("Received data from server: " + Encoding.UTF8.GetString(buffer, 0, bytesRead));
+    //    string input = Console.ReadLine();
+    //    byte[] data = Encoding.UTF8.GetBytes(input);
+    //    pipeClient.Write(data, 0, data.Length);
     //}
+
+    NamedPipeClientStream pipeClient = (NamedPipeClientStream)pipeClientObj;
+
+    byte[] buffer = new byte[1024];
+    int bytesRead;
+
+    while ((bytesRead = pipeClient.Read(buffer, 0, buffer.Length)) > 0)
+    {
+        string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        Console.WriteLine("Received from server: " + input);
+    }
 }
 
 static void WriteData(object pipeClientObj)
@@ -108,14 +110,40 @@ static void WriteData(object pipeClientObj)
 
     byte[] buffer = new byte[1024];
     int bytesRead;
+    //string input = null;
+    //while ((input = Console.ReadLine()) != null)
+    //{
+    //    byte[] d = Encoding.UTF8.GetBytes(input);
+    //    pipeClient.Write(d, 0, d.Length);
+    //}
 
-    while(true)
+    while (true)
     {
-        // Read a response from the server (optional)
-        bytesRead = pipeClient.Read(buffer, 0, buffer.Length);
-        string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        Console.WriteLine("Received from server: " + response);
+        string input = Console.ReadLine();
+        byte[] d = Encoding.UTF8.GetBytes(input);
+        pipeClient.Write(d, 0, d.Length);
+        pipeClient.Flush();
     }
+
+    // Send a message to the server (replace with your desired message)
+    //string message = "Hello from the client!";
+    //byte[] data = Encoding.UTF8.GetBytes(message);
+    //pipeClient.Write(data, 0, data.Length);
+
+    //while (true)
+    //{
+    //    // Read a response from the server (optional)
+    //    bytesRead = pipeClient.Read(buffer, 0, buffer.Length);
+    //    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+    //    Console.WriteLine("Received from server: " + response);
+    //}
+
+    //NamedPipeClientStream pipeClient = (NamedPipeClientStream)pipeClientObj;
+
+    //// Send a message to the server (replace with your desired message)
+    //string message = "Hello from the client!";
+    //byte[] data = Encoding.UTF8.GetBytes(message);
+    //pipeClient.Write(data, 0, data.Length);
 
     // Send data to the server
     //string input = Console.ReadLine();
@@ -217,20 +245,29 @@ try
     //readThread.Join();
     //writeThread.Join();
 
-    byte[] buffer = new byte[1024];
-    int bytesRead;
+    //byte[] buffer = new byte[1024];
+    //int bytesRead;
 
-    while (true)
-    {
-        string input = Console.ReadLine();
-        byte[] data = Encoding.UTF8.GetBytes(input);
-        pipeClient.Write(data, 0, data.Length);
+    //while (true)
+    //{
+    //    string input = Console.ReadLine();
+    //    byte[] data = Encoding.UTF8.GetBytes(input);
+    //    pipeClient.Write(data, 0, data.Length);
 
-        // Read a response from the server (optional)
-        bytesRead = pipeClient.Read(buffer, 0, buffer.Length);
-        string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        Console.WriteLine("Received from server: " + response);
-    }
+    //    // Read a response from the server (optional)
+    //    bytesRead = pipeClient.Read(buffer, 0, buffer.Length);
+    //    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+    //    Console.WriteLine("Received from server: " + response);
+    //}
+
+    Thread readThread = new Thread(ReadData);
+    readThread.Start(pipeClient);
+
+    Thread writeThread = new Thread(WriteData);
+    writeThread.Start(pipeClient);
+
+    readThread.Join();
+    writeThread.Join();
 
 }
 catch (Exception ex)
