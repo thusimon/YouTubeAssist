@@ -7,9 +7,10 @@
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
-    "esbuild-plugin-copy": "^2.1.1"
+    "esbuild-plugin-copy": "^2.1.1",
+    "typescript": "^5.6.3"
   },
   "scripts": {
-    "build": "esbuild src/popup/popup.ts --bundle --outfile=build/popup/popup.js"
+    "build": "node src/build.js"
   }
 }
