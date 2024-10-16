@@ -1,5 +1,6 @@
 const esbuild = require('esbuild');
 const {copy} = require('esbuild-plugin-copy');
+const sassPlugin = require("esbuild-plugin-sass");
 
 
 esbuild.build({
@@ -18,5 +19,6 @@ esbuild.build({
         to: ['./build'],
       },
     }),
+    sassPlugin(),
   ],
 });
