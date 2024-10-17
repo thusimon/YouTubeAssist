@@ -243,9 +243,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"WebExt@workspace:.":
+"WebExt-NativeMessage@workspace:.":
   version: 0.0.0-use.local
-  resolution: "WebExt@workspace:."
+  resolution: "WebExt-NativeMessage@workspace:."
   dependencies:
     esbuild: "npm:^0.24.0"
     esbuild-plugin-copy: "npm:^2.1.1"

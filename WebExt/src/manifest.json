@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "WebExt",
+  "name": "WebExt-NativeMessage",
   "version": "0.0.1",
   "description": "Extension to connect to native app",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAojiuKEPhdJ3Twn/1R5ttp5bk8au+CSqUo+1E1fNasy6azE0pkM3Fq47CSReSEldLoNh5sajYmTdqjo77pjKY8xIPMX7GzJKV9AfSEIzDqIp7u14MXjmvm9l7v0a94TGopDoqsw/Pz9gAagnmclPfzefuBPrg08X0dAbIcT0b/r9K2IA0F9kwEkJASVX6A3Ntbx2/rijtor0qzrMcZxMANgTY06fDnhCI6d3X329J3A0QLI7iHmizV+GzEeIFgeSqx1BzqEl5u1o9T5hN/fjl9ATdDcQ1uiq4A8IevxCHlGFg4V7VvbXm72hRCTi5pR1yxxoPpn4sG+V6hdARlFzMPwIDAQAB",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
