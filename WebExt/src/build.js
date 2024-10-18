@@ -5,7 +5,8 @@ const sassPlugin = require("esbuild-plugin-sass");
 
 esbuild.build({
   entryPoints: [
-    './src/popup/popup.ts'
+    './src/popup/popup.ts',
+    './src/service-worker.ts'
   ],
   bundle: true,
   entryNames: '[dir]/[name]',
