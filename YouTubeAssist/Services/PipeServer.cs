@@ -102,29 +102,29 @@ namespace YouTubeAssist.Services
                 //byte[] responseData = Encoding.UTF8.GetBytes("Hello from the server!");
                 //pipeServer.Write(responseData, 0, responseData.Length);
 
-                Thread readThread = new Thread(ReadData);
-                readThread.Start(pipeServer);
+                //Thread readThread = new Thread(ReadData);
+                //readThread.Start(pipeServer);
 
-                Thread writeThread = new Thread(WriteData);
-                writeThread.Start(pipeServer);
+                //Thread writeThread = new Thread(WriteData);
+                //writeThread.Start(pipeServer);
 
-                readThread.Join();
-                writeThread.Join();
+                //readThread.Join();
+                //writeThread.Join();
 
-                //byte[] buffer = new byte[1024];
-                //int bytesRead;
+                byte[] buffer = new byte[1024];
+                int bytesRead;
 
-                //while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
-                //{
-                //    string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                //    Debug.WriteLine("Received from client: " + input);
-                //    pipeView.MessageIncome += "\nReceived message from Client:" + input + '\n';
+                while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Debug.WriteLine("Received from client: " + input);
+                    pipeView.MessageIncome += "\nReceived message from Client:" + input + '\n';
 
-                //    // Send a response (optional)
-                //    string response = "Received input: " + input;
-                //    byte[] responseData = Encoding.UTF8.GetBytes(response);
-                //    pipeServer.Write(responseData, 0, responseData.Length);
-                //}
+                    // Send a response (optional)
+                    string response = "Received input: " + input;
+                    byte[] responseData = Encoding.UTF8.GetBytes(response);
+                    pipeServer.Write(responseData, 0, responseData.Length);
+                }
             }
             catch (Exception e)
             {

@@ -9,6 +9,7 @@ esbuild.build({
     './src/service-worker.ts'
   ],
   bundle: true,
+  format: 'esm',
   entryNames: '[dir]/[name]',
   outbase: 'src',
   outdir: './build',

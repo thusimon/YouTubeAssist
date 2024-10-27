@@ -6,10 +6,22 @@ using System.Reflection.PortableExecutable;
 using System.Security.Principal;
 using System.Text;
 
+// https://www.nuget.org/packages/NativeMessaging/#
 
-var pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
+
+NamedPipeClientStream pipeClient = null;
+static void connectToPipe()
+{
+    NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
                         PipeDirection.InOut, PipeOptions.None,
                         TokenImpersonationLevel.Impersonation);
+    pipeClient.Connect(5000);
+    //return pipeClient;
+}
+
+//var pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
+//                        PipeDirection.InOut, PipeOptions.None,
+//                        TokenImpersonationLevel.Impersonation);
 
 //pipeClient.Connect();
 //Console.WriteLine("Connected to server pipe.\n");
@@ -78,7 +90,7 @@ async Task hostTasks2(StreamReader sr, StreamWriter sw)
     //await Task.Run(() => readPipeStream2(sr));
 }
 
-Console.WriteLine("Running r/w PipeStream tasks");
+//Console.WriteLine("Running r/w PipeStream tasks");
 //await hostTasks2(sr, sw);
 //await hostTasks(ss);
 
@@ -175,11 +187,99 @@ string? message = "";
 //string responseFromServer = sr.ReadLine();
 //Console.WriteLine("Received from server: " + responseFromServer);
 
+
+static string OpenStandardStreamIn()
+{
+    //// We need to read first 4 bytes for length information
+    //Stream stdin = Console.OpenStandardInput();
+    //int length = 0;
+    //byte[] bytes = new byte[4];
+    //stdin.Read(bytes, 0, 4);
+    //length = System.BitConverter.ToInt32(bytes, 0);
+
+    //string input = "";
+    //for (int i = 0; i < length; i++)
+    //{
+    //    input += (char)stdin.ReadByte();
+    //}
+
+    //return input;
+    string message = "";
+    byte[] lengthBytes = new byte[4];
+    Console.OpenStandardInput().Read(lengthBytes, 0, 4);  // Read the 4-byte length prefix
+    int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+    if (messageLength == 0)
+    {
+        return message;
+    }
+
+    byte[] messageBytes = new byte[messageLength];
+    Console.OpenStandardInput().Read(messageBytes, 0, messageLength);  // Read the actual message
+    message = Encoding.UTF8.GetString(messageBytes);
+    return message;
+}
+
+static void OpenStandardStreamOut(string stringData)
+{
+    //// We need to send the 4 btyes of length information
+    //string msgdata = "{\"resp\":\"" + stringData + "\"}";
+    int DataLength = stringData.Length;
+    byte[] responseBytes = Encoding.UTF8.GetBytes(stringData);
+    Stream stdout = Console.OpenStandardOutput();
+    //stdout.WriteByte((byte)((DataLength >> 0) & 0xFF));
+    //stdout.WriteByte((byte)((DataLength >> 8) & 0xFF));
+    //stdout.WriteByte((byte)((DataLength >> 16) & 0xFF));
+    //stdout.WriteByte((byte)((DataLength >> 24) & 0xFF));
+    //Available total length : 4,294,967,295 ( FF FF FF FF )
+    byte[] lengthBytes = BitConverter.GetBytes(responseBytes.Length);
+    Console.OpenStandardOutput().Write(lengthBytes, 0, 4);  // Write the 4-byte length prefix
+    Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
+    Console.Out.Flush();  // Flush the output to ensure it's sent
+}
+
 try
 {
-    Console.WriteLine("Connecting to server...");
-    pipeClient.Connect(5000);  // Timeout after 5 seconds if the server isn't available
-    Console.WriteLine("Connected to server.");
+
+
+    Debug.WriteLine("Connecting to server...");
+
+    Thread connectThread = new Thread(connectToPipe);
+    Task<NamedPipeClientStream> connectPipeTask = Task.Run(() =>
+    {
+        pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
+                        PipeDirection.InOut, PipeOptions.None,
+                        TokenImpersonationLevel.Impersonation);
+        pipeClient.Connect(5000);
+        return pipeClient;
+    });
+
+    //pipeClient = connectPipeTask.Result;
+
+    ////pipeClient.Connect(5000);  // Timeout after 5 seconds if the server isn't available
+    //Debug.WriteLine("Connected to server.");
+
+    //Task readConsoleTask = Task.Run(() =>
+    //{
+    //    while (true)
+    //    {
+    //        byte[] lengthBytes = new byte[4];
+    //        if (Console.OpenStandardInput().Read(lengthBytes, 0, 4) == 0)
+    //        {
+    //            return;
+    //        }
+
+    //        int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+
+    //        // Read the message
+    //        byte[] messageBytes = new byte[messageLength];
+    //        Console.OpenStandardInput().Read(messageBytes, 0, messageLength);
+    //        string message = Encoding.UTF8.GetString(messageBytes);
+
+    //        Debug.WriteLine(message);
+    //    }
+    //});
+
+    //readConsoleTask.Start();
 
     //using (StreamWriter writer = new StreamWriter(pipeClient, Encoding.UTF8) { AutoFlush = true })
     //{
@@ -260,17 +360,61 @@ try
     //    Console.WriteLine("Received from server: " + response);
     //}
 
-    Thread readThread = new Thread(ReadData);
-    readThread.Start(pipeClient);
+    //Thread readThread = new Thread(ReadData);
+    //readThread.Start(pipeClient);
 
-    Thread writeThread = new Thread(WriteData);
-    writeThread.Start(pipeClient);
+    //Thread writeThread = new Thread(WriteData);
+    //writeThread.Start(pipeClient);
 
-    readThread.Join();
-    writeThread.Join();
+    //readThread.Join();
+    //writeThread.Join();
 
+
+
+    //while (true)
+    //{
+    //    string input = OpenStandardStreamIn();
+    //    if (input !="")
+    //    {
+    //        OpenStandardStreamOut("Received to Native App: hello");
+    //    }
+
+    //    //OpenStandardStreamOut("Recieved: " + OpenStandardStreamIn());
+    //}
+
+    // Reading from Chrome (binary input
+    bool flag = true;
+    while(flag)
+    {
+        byte[] lengthBytes = new byte[4];
+        int readLength = Console.OpenStandardInput().Read(lengthBytes, 0, 4);  // Read the 4-byte length prefix
+        int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+
+        if (readLength == 0)
+        {
+            continue;
+        }
+
+        byte[] messageBytes = new byte[messageLength];
+        Console.OpenStandardInput().Read(messageBytes, 0, messageLength);  // Read the actual message
+        string message2 = Encoding.UTF8.GetString(messageBytes);
+
+        // Responding to Chrome (binary output)
+        string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+        string response = "{\"response\": \"Hello from native host: " + dateTime + "\"}";
+        byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+
+        //Thread.Sleep(10000);
+        byte[] responseLength = BitConverter.GetBytes(responseBytes.Length);
+        Console.OpenStandardOutput().Write(responseLength, 0, 4);  // Write the 4-byte length prefix
+        Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
+        Console.Out.Flush();  // Ensure the message is sent
+
+        //flag = false;
+    }
+    
 }
 catch (Exception ex)
 {
-    Console.WriteLine("Error: " + ex.Message);
+    Debug.WriteLine("Error: " + ex.Message);
 }

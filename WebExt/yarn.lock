@@ -243,10 +243,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chrome@npm:^0.0.279":
+  version: 0.0.279
+  resolution: "@types/chrome@npm:0.0.279"
+  dependencies:
+    "@types/filesystem": "npm:*"
+    "@types/har-format": "npm:*"
+  checksum: 10c0/ceccbad43d850d24c3232844982016560e96a437ad456b05f6989a60d817ef4753a12d2bbc41354561afc4df555dac11678f1c3cf1faf406f1c1791c87fa779b
+  languageName: node
+  linkType: hard
+
+"@types/filesystem@npm:*":
+  version: 0.0.36
+  resolution: "@types/filesystem@npm:0.0.36"
+  dependencies:
+    "@types/filewriter": "npm:*"
+  checksum: 10c0/3ebec32f0494b0a2612187d148e9f253ff55672c53f566d9a1e6d891eb6e2372df93c252b594b2775bc53e6660c4c37fdb05dc1b26e72b60a31010da8e1f7317
+  languageName: node
+  linkType: hard
+
+"@types/filewriter@npm:*":
+  version: 0.0.33
+  resolution: "@types/filewriter@npm:0.0.33"
+  checksum: 10c0/363ef9a658a961ceae04f52934562e4ebdcdc3a2564dd8544f593d77113c16574938b6ba4fea0bee418c37bda0668c1e03dfedb6adf00d55853f51fb3a59247b
+  languageName: node
+  linkType: hard
+
+"@types/har-format@npm:*":
+  version: 1.2.16
+  resolution: "@types/har-format@npm:1.2.16"
+  checksum: 10c0/77e952bc219db0c1f0588cab3b95865bc343b922e8423a76fbbd6a757c40709a256933fa415eb8fefda6ea5897c8e3dd3191bb8a82b37c13d9232467d31ae485
+  languageName: node
+  linkType: hard
+
 "WebExt-NativeMessage@workspace:.":
   version: 0.0.0-use.local
   resolution: "WebExt-NativeMessage@workspace:."
   dependencies:
+    "@types/chrome": "npm:^0.0.279"
+    chrome-types: "npm:^0.1.312"
     esbuild: "npm:^0.24.0"
     esbuild-plugin-copy: "npm:^2.1.1"
     esbuild-plugin-sass: "npm:^1.0.1"
@@ -422,6 +457,13 @@ __metadata:
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
   checksum: 10c0/594754e1303672171cc04e50f6c398ae16128eb134a88f801bf5354fd96f205320f23536a045d9abd8b51024a149696e51231565891d4efdab8846021ecf88e6
+  languageName: node
+  linkType: hard
+
+"chrome-types@npm:^0.1.312":
+  version: 0.1.312
+  resolution: "chrome-types@npm:0.1.312"
+  checksum: 10c0/220f01e063a7e7e446def86ac8408a9f4bf18b731b4ed8aae42c3682a615cd6286e38e0faf927dce4320912b944d586b1b936fca270eb20743fb9689122cb238
   languageName: node
   linkType: hard
 

@@ -6,7 +6,15 @@
   </head>
   <body>
     <div class="main-content-container">
-      <h2>Native host demo</h2>
+      <h2><a id="popup-link">Native host demo</a></h2>
+      <div class="tab">
+        <button class="tablinks" id="tab-port">Port Mode</button>
+        <button class="tablinks" id="tab-message">Message Mode</button>
+      </div>
+      <div class="port-controls">
+        <button id="port-btn-connect">Connect</button>
+        <button id="port-btn-disconnect">Disconnect</button>
+      </div>
       <div class="from-native-container">
         <p>From Native</p>
         <textarea id="from-native-text"></textarea>
