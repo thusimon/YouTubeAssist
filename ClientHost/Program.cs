@@ -5,6 +5,7 @@ using System.IO.Pipes;
 using System.Reflection.PortableExecutable;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json;
 
 // https://www.nuget.org/packages/NativeMessaging/#
 
@@ -112,11 +113,12 @@ static void ReadData(object pipeClientObj)
     while ((bytesRead = pipeClient.Read(buffer, 0, buffer.Length)) > 0)
     {
         string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        Console.WriteLine("Received from server: " + input);
+        Debug.WriteLine("Received from server: " + input);
+
     }
 }
 
-static void WriteData(object pipeClientObj)
+static void WriteData(object pipeClientObj, string input)
 {
     NamedPipeClientStream pipeClient = (NamedPipeClientStream)pipeClientObj;
 
@@ -129,13 +131,17 @@ static void WriteData(object pipeClientObj)
     //    pipeClient.Write(d, 0, d.Length);
     //}
 
-    while (true)
-    {
-        string input = Console.ReadLine();
-        byte[] d = Encoding.UTF8.GetBytes(input);
-        pipeClient.Write(d, 0, d.Length);
-        pipeClient.Flush();
-    }
+    //while (true)
+    //{
+    //    string input = Console.ReadLine();
+    //    byte[] d = Encoding.UTF8.GetBytes(input);
+    //    pipeClient.Write(d, 0, d.Length);
+    //    pipeClient.Flush();
+    //}
+
+    byte[] d = Encoding.UTF8.GetBytes(input);
+    pipeClient.Write(d, 0, d.Length);
+    pipeClient.Flush();
 
     // Send a message to the server (replace with your desired message)
     //string message = "Hello from the client!";
@@ -397,18 +403,32 @@ try
 
         byte[] messageBytes = new byte[messageLength];
         Console.OpenStandardInput().Read(messageBytes, 0, messageLength);  // Read the actual message
-        string message2 = Encoding.UTF8.GetString(messageBytes);
+        string input = Encoding.UTF8.GetString(messageBytes);
+
+        RequestMessage? requestMessage = JsonSerializer.Deserialize<RequestMessage>(input);
+
+        string req = "";
+        if (requestMessage != null)
+        {
+            req = requestMessage.req;
+        }
+
+        if (pipeClient != null)
+        {
+            WriteData(pipeClient, req);
+        }
+
 
         // Responding to Chrome (binary output)
-        string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-        string response = "{\"response\": \"Hello from native host: " + dateTime + "\"}";
-        byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+        //string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+        //string response = "{\"resp\": \"" + "Get message: " + req + " from web-ext, send time from native host: " + dateTime + "\"}";
+        //byte[] responseBytes = Encoding.UTF8.GetBytes(response);
 
-        //Thread.Sleep(10000);
-        byte[] responseLength = BitConverter.GetBytes(responseBytes.Length);
-        Console.OpenStandardOutput().Write(responseLength, 0, 4);  // Write the 4-byte length prefix
-        Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
-        Console.Out.Flush();  // Ensure the message is sent
+        ////Thread.Sleep(10000);
+        //byte[] responseLength = BitConverter.GetBytes(responseBytes.Length);
+        //Console.OpenStandardOutput().Write(responseLength, 0, 4);  // Write the 4-byte length prefix
+        //Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
+        //Console.Out.Flush();  // Ensure the message is sent
 
         //flag = false;
     }

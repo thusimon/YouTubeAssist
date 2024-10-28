@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="popup.js" type="text/javascript"></script>
     <link href="popup.css" rel="stylesheet" type="text/css">
   </head>
   <body>
     <div class="main-content-container">
-      <h2><a id="popup-link">Native host demo</a></h2>
+      <h2><a id="popup-link" href="#">Native host demo</a></h2>
       <div class="tab">
-        <button class="tablinks" id="tab-port">Port Mode</button>
-        <button class="tablinks" id="tab-message">Message Mode</button>
+        <button class="tab-link active" id="tab-port">Port Mode</button>
+        <button class="tab-link" id="tab-message">Message Mode</button>
       </div>
-      <div class="port-controls">
-        <button id="port-btn-connect">Connect</button>
-        <button id="port-btn-disconnect">Disconnect</button>
+      <div id="port-controls">
+        <button class="port-btn" id="port-btn-connect">Connect</button>
+        <button class="port-btn" id="port-btn-disconnect">Disconnect</button>
       </div>
       <div class="from-native-container">
         <p>From Native</p>
@@ -23,9 +22,10 @@
         <p>To Native</p>
         <div class="to-native-send">
           <input id="to-native-text"></input>
-          <button>Send</button>
+          <button id="to-native-btn">Send</button>
         </div>
       </div>
     </div>
+    <script src="popup.js" type="text/javascript"></script>
   </body>
 </html>
