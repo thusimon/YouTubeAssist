@@ -6,11 +6,15 @@ using System.Reflection.PortableExecutable;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
+using System.Xml;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // https://www.nuget.org/packages/NativeMessaging/#
 
 
 NamedPipeClientStream pipeClient = null;
+StreamWriter writer = null;
+
 static void connectToPipe()
 {
     NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
@@ -243,19 +247,66 @@ static void OpenStandardStreamOut(string stringData)
     Console.Out.Flush();  // Flush the output to ensure it's sent
 }
 
+
+RequestMessage? ReadStdInput()
+{
+    Debug.WriteLine("Waiting for Data");
+
+    Stream stdin = Console.OpenStandardInput();
+
+    byte[] lengthBytes = new byte[4];
+    stdin.Read(lengthBytes, 0, 4);
+
+    char[] buffer = new char[BitConverter.ToInt32(lengthBytes, 0)];
+
+    using (StreamReader reader = new StreamReader(stdin))
+    {
+        if (reader.Peek() >= 0)
+        {
+            reader.Read(buffer, 0, buffer.Length);
+            return JsonSerializer.Deserialize<RequestMessage>(new string(buffer));
+        }
+        else
+        {
+            return null;
+        }
+    }
+}
+
+void WriteStdOut(string resp)
+{
+    ResponseMessage responseMessage = new ResponseMessage();
+    responseMessage.resp = resp;
+    string respOut = JsonSerializer.Serialize<ResponseMessage>(responseMessage);
+    Debug.WriteLine("Sending Message:" + respOut);
+
+    byte[] bytes = Encoding.UTF8.GetBytes(respOut);
+    Stream stdout = Console.OpenStandardOutput();
+
+    stdout.WriteByte((byte)((bytes.Length >> 0) & 0xFF));
+    stdout.WriteByte((byte)((bytes.Length >> 8) & 0xFF));
+    stdout.WriteByte((byte)((bytes.Length >> 16) & 0xFF));
+    stdout.WriteByte((byte)((bytes.Length >> 24) & 0xFF));
+    stdout.Write(bytes, 0, bytes.Length);
+    stdout.Flush();
+}
+
+
 try
 {
 
 
     Debug.WriteLine("Connecting to server...");
 
-    Thread connectThread = new Thread(connectToPipe);
+    //Thread connectThread = new Thread(connectToPipe);
     Task<NamedPipeClientStream> connectPipeTask = Task.Run(() =>
     {
         pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
                         PipeDirection.InOut, PipeOptions.None,
                         TokenImpersonationLevel.Impersonation);
         pipeClient.Connect(5000);
+        writer = new StreamWriter(pipeClient);
+        writer.AutoFlush = true;
         return pipeClient;
     });
 
@@ -388,9 +439,63 @@ try
     //    //OpenStandardStreamOut("Recieved: " + OpenStandardStreamIn());
     //}
 
+    //Task readStdInTask = Task.Run(() =>
+    //{
+    //    RequestMessage? requestMessage;
+
+    //    while (true)
+    //    {
+    //        requestMessage = ReadStdInput();
+    //        if (requestMessage == null)
+    //        {
+    //            continue;
+    //        }
+    //        Debug.WriteLine(
+    //            "Data Received:" + JsonSerializer.Serialize<RequestMessage>(requestMessage));
+
+    //        if (pipeClient != null && pipeClient.IsConnected && writer != null)
+    //        {
+    //            Debug.WriteLine("sending message to pipeClient");
+    //            string req = requestMessage.req;
+    //            writer.WriteLine(req ?? "");
+    //        }
+    //        else
+    //        {
+    //            Debug.WriteLine("something wrong, pipeClient is not connected");
+    //        }
+    //    }
+
+    //});
+
+    //Task readPipeTask = Task.Run(() =>
+    //{
+    //    using (StreamReader reader = new StreamReader(pipeClient))
+    //    {
+    //        string message;
+    //        while ((message = reader.ReadLine()) != null)
+    //        {
+    //            Debug.WriteLine("Received from native app: " + message);
+
+    //            WriteStdOut(message);
+    //            //Responding to Chrome(binary output)
+    //            //string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+
+
+    //            //string response = "{\"resp\": \"" + message + "\"}";
+    //            //byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+
+    //            ////Thread.Sleep(10000);
+    //            //byte[] responseLength = BitConverter.GetBytes(responseBytes.Length);
+    //            //Console.OpenStandardOutput().Write(responseLength, 0, 4);  // Write the 4-byte length prefix
+    //            //Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
+    //            //Console.Out.Flush();  // Ensure the message is sent
+    //        }
+    //    }
+    //});
+
     // Reading from Chrome (binary input
     bool flag = true;
-    while(flag)
+    while (flag)
     {
         byte[] lengthBytes = new byte[4];
         int readLength = Console.OpenStandardInput().Read(lengthBytes, 0, 4);  // Read the 4-byte length prefix
@@ -413,13 +518,7 @@ try
             req = requestMessage.req;
         }
 
-        if (pipeClient != null)
-        {
-            WriteData(pipeClient, req);
-        }
-
-
-        // Responding to Chrome (binary output)
+        ////Responding to Chrome(binary output)
         //string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
         //string response = "{\"resp\": \"" + "Get message: " + req + " from web-ext, send time from native host: " + dateTime + "\"}";
         //byte[] responseBytes = Encoding.UTF8.GetBytes(response);
@@ -430,9 +529,15 @@ try
         //Console.OpenStandardOutput().Write(responseBytes, 0, responseBytes.Length);  // Write the actual message
         //Console.Out.Flush();  // Ensure the message is sent
 
+        if (pipeClient != null && pipeClient.IsConnected && writer != null)
+        {
+            //WriteData(pipeClient, req);
+            writer.WriteLine(req);
+        }
+
         //flag = false;
     }
-    
+
 }
 catch (Exception ex)
 {

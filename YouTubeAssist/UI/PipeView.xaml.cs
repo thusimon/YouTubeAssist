@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -24,6 +25,7 @@ namespace YouTubeAssist.UI
     public partial class PipeView : UserControl, INotifyPropertyChanged
     {
         private string messageIncome = "";
+        private string messageOutput = "";
         PipeServer? pipeServer = null;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,6 +41,19 @@ namespace YouTubeAssist.UI
                 OnPropertyChanged();
             }
         }
+
+        public string MessageOutput
+        {
+            get
+            {
+                return messageOutput;
+            }
+            set
+            {
+                messageOutput = value;
+                OnPropertyChanged();
+            }
+        }
         public PipeView()
         {
             pipeServer = new PipeServer(this);
@@ -49,6 +64,11 @@ namespace YouTubeAssist.UI
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void Send_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(MessageOutput);
         }
     }
 }

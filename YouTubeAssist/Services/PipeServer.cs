@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using System.Diagnostics;
 using System.Threading;
 using YouTubeAssist.UI;
+using System.Security.Principal;
 
 namespace YouTubeAssist.Services
 {
@@ -17,16 +18,74 @@ namespace YouTubeAssist.Services
         public string messageIncome = "";
         public string messageOutcome = "";
         public PipeView pipeView;
+        NamedPipeServerStream pipeServer = null;
+        StreamReader reader = null;
+        StreamWriter writer = null;
         public PipeServer(PipeView pv)
         {
             Debug.WriteLine("\n*** Named pipe server stream with impersonation example ***\n");
             Debug.WriteLine("Waiting for client connect...\n");
 
-            Thread pipeServerThread = new Thread(ServerThread);
             pipeView = pv;
             pipeView.MessageIncome += "\n*** Named pipe server stream with impersonation example ***\n";
             pipeView.MessageIncome += "\nWaiting for client connect...\n";
-            pipeServerThread.Start();
+            //Thread pipeServerThread = new Thread(ServerThread);
+            //pipeServerThread.Start();
+
+            Task connectPipeTask = Task.Run(() =>
+            {
+                pipeServer = new NamedPipeServerStream("com.utticus.youtube.assist", PipeDirection.InOut);
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+
+                // Wait for a client to connect
+                pipeServer.WaitForConnection();
+
+                Debug.WriteLine("Client connected on thread[{0}].", threadId);
+                pipeView.MessageIncome += String.Format("\nClient connected on thread [{0}] as user {1}\n", threadId, pipeServer.GetImpersonationUserName());
+                //return pipeServer;
+
+                Task readPipeTask = Task.Run(() => {
+                    using (var reader = new StreamReader(pipeServer))
+                    using (var writer = new StreamWriter(pipeServer))
+                    {
+                        writer.AutoFlush = true;
+                        string message;
+                        while ((message = reader.ReadLine()) != null)
+                        {
+                            Debug.WriteLine("Received from WebExtension: " + message);
+                            pipeView.MessageIncome += "\nReceived message from WebExtension:" + message + '\n';
+
+                            // Send a response (optional)
+                            //string response = "Received input: " + message;
+                            //byte[] responseData = Encoding.UTF8.GetBytes(response);
+                            //pipeServer.Write(responseData, 0, responseData.Length);
+
+                            //Responding to Chrome(binary output)
+                            string dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                            string response = "Get message: " + message + " from web-ext, send time from native app: " + dateTime;
+                            writer.WriteLine(response);
+                        }
+                    }
+                });
+            });
+
+            //Task readPipeTask = Task.Run(() => {
+            //    using (var reader = new StreamReader(pipeServer))
+            //    {
+            //        string message;
+            //        while ((message = reader.ReadLine()) != null)
+            //        {
+            //            Debug.WriteLine("Received from WebExtension: " + message);
+            //            pipeView.MessageIncome += "\nReceived message from WebExtension:" + message + '\n';
+
+            //            // Send a response (optional)
+            //            //string response = "Received input: " + message;
+            //            //byte[] responseData = Encoding.UTF8.GetBytes(response);
+            //            //pipeServer.Write(responseData, 0, responseData.Length);
+            //        }
+            //    }
+            //});
+
             Debug.WriteLine("\nServer thread created.");
         }
 
@@ -35,102 +94,116 @@ namespace YouTubeAssist.Services
             NamedPipeServerStream pipeServer =
                 new NamedPipeServerStream("com.utticus.youtube.assist", PipeDirection.InOut);
 
-            int threadId = Thread.CurrentThread.ManagedThreadId;
+            //int threadId = Thread.CurrentThread.ManagedThreadId;
 
-            // Wait for a client to connect
-            pipeServer.WaitForConnection();
+            //// Wait for a client to connect
+            //pipeServer.WaitForConnection();
 
-            Debug.WriteLine("Client connected on thread[{0}].", threadId);
-            pipeView.MessageIncome += String.Format("\nClient connected on thread [{0}] as user {1}\n", threadId, pipeServer.GetImpersonationUserName());
+            //Debug.WriteLine("Client connected on thread[{0}].", threadId);
+            //pipeView.MessageIncome += String.Format("\nClient connected on thread [{0}] as user {1}\n", threadId, pipeServer.GetImpersonationUserName());
 
-            try
-            {
-                // Read from client
-                //using (StreamReader reader = new StreamReader(pipeServer, Encoding.UTF8, false, 1024))
-                //{
-                //    string messageFromClient = reader.ReadLine();  // Read client's message
-                //    Console.WriteLine("Received from client: " + messageFromClient);
-                //}
+            //using (var reader = new StreamReader(pipeServer))
+            //{
+            //    string message;
+            //    while ((message = reader.ReadLine()) != null)
+            //    {
+            //        Debug.WriteLine("Received from WebExtension: " + message);
+            //        pipeView.MessageIncome += "\nReceived message from WebExtension:" + message + '\n';
 
-                //// Write response to client
-                //using (StreamWriter writer = new StreamWriter(pipeServer, Encoding.UTF8, 1024) { AutoFlush = true })
-                //{
-                //    string response = "Hello from server!";
-                //    writer.WriteLine(response);  // Send response
-                //    writer.Flush();  // Ensure response is sent
-                //    Console.WriteLine("Sent to client: " + response);
-                //}
-                //pipeServer.WaitForPipeDrain();
+            //        // Send a response (optional)
+            //        //string response = "Received input: " + message;
+            //        //byte[] responseData = Encoding.UTF8.GetBytes(response);
+            //        //pipeServer.Write(responseData, 0, responseData.Length);
+            //    }
+            //}
+            //try
+            //{
+            //    // Read from client
+            //    //using (StreamReader reader = new StreamReader(pipeServer, Encoding.UTF8, false, 1024))
+            //    //{
+            //    //    string messageFromClient = reader.ReadLine();  // Read client's message
+            //    //    Console.WriteLine("Received from client: " + messageFromClient);
+            //    //}
 
-                //byte[] buffer = new byte[1024];
-                //int bytesRead = pipeServer.Read(buffer, 0, buffer.Length);
-                //string d = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            //    //// Write response to client
+            //    //using (StreamWriter writer = new StreamWriter(pipeServer, Encoding.UTF8, 1024) { AutoFlush = true })
+            //    //{
+            //    //    string response = "Hello from server!";
+            //    //    writer.WriteLine(response);  // Send response
+            //    //    writer.Flush();  // Ensure response is sent
+            //    //    Console.WriteLine("Sent to client: " + response);
+            //    //}
+            //    //pipeServer.WaitForPipeDrain();
 
-                //Debug.WriteLine("Received message from client: " + d);
+            //    //byte[] buffer = new byte[1024];
+            //    //int bytesRead = pipeServer.Read(buffer, 0, buffer.Length);
+            //    //string d = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-                //string response = "Hello from the server!";
-                //byte[] responseData = Encoding.UTF8.GetBytes(response);
-                //pipeServer.Write(responseData, 0, responseData.Length);
+            //    //Debug.WriteLine("Received message from client: " + d);
 
-                //using (StreamReader reader = new StreamReader(pipeServer))
-                //{
-                //    string d;
+            //    //string response = "Hello from the server!";
+            //    //byte[] responseData = Encoding.UTF8.GetBytes(response);
+            //    //pipeServer.Write(responseData, 0, responseData.Length);
 
-                //    while ((d = reader.ReadLine()) != null)
-                //    {
-                //        // Process the received string
-                //        Debug.WriteLine("Received string: " + d);
-                //    }
-                //}
+            //    //using (StreamReader reader = new StreamReader(pipeServer))
+            //    //{
+            //    //    string d;
 
-                //// Send a response (optional)
-                //using (StreamWriter writer = new StreamWriter(pipeServer))
-                //{
-                //    writer.WriteLine("Hello from the server!");
-                //}
+            //    //    while ((d = reader.ReadLine()) != null)
+            //    //    {
+            //    //        // Process the received string
+            //    //        Debug.WriteLine("Received string: " + d);
+            //    //    }
+            //    //}
 
-                //byte[] buffer = new byte[1024];
-                //int bytesRead;
+            //    //// Send a response (optional)
+            //    //using (StreamWriter writer = new StreamWriter(pipeServer))
+            //    //{
+            //    //    writer.WriteLine("Hello from the server!");
+            //    //}
 
-                //while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
-                //{
-                //    // Process the received bytes
-                //    Debug.WriteLine("Received bytes: " + Encoding.UTF8.GetString(buffer, 0, bytesRead));
-                //}
+            //    //byte[] buffer = new byte[1024];
+            //    //int bytesRead;
 
-                //// Send a response (optional)
-                //byte[] responseData = Encoding.UTF8.GetBytes("Hello from the server!");
-                //pipeServer.Write(responseData, 0, responseData.Length);
+            //    //while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
+            //    //{
+            //    //    // Process the received bytes
+            //    //    Debug.WriteLine("Received bytes: " + Encoding.UTF8.GetString(buffer, 0, bytesRead));
+            //    //}
 
-                //Thread readThread = new Thread(ReadData);
-                //readThread.Start(pipeServer);
+            //    //// Send a response (optional)
+            //    //byte[] responseData = Encoding.UTF8.GetBytes("Hello from the server!");
+            //    //pipeServer.Write(responseData, 0, responseData.Length);
 
-                //Thread writeThread = new Thread(WriteData);
-                //writeThread.Start(pipeServer);
+            //    //Thread readThread = new Thread(ReadData);
+            //    //readThread.Start(pipeServer);
 
-                //readThread.Join();
-                //writeThread.Join();
+            //    //Thread writeThread = new Thread(WriteData);
+            //    //writeThread.Start(pipeServer);
 
-                byte[] buffer = new byte[1024];
-                int bytesRead;
+            //    //readThread.Join();
+            //    //writeThread.Join();
 
-                while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Debug.WriteLine("Received from client: " + input);
-                    pipeView.MessageIncome += "\nReceived message from Client:" + input + '\n';
+            //    byte[] buffer = new byte[1024];
+            //    int bytesRead;
 
-                    // Send a response (optional)
-                    string response = "Received input: " + input;
-                    byte[] responseData = Encoding.UTF8.GetBytes(response);
-                    pipeServer.Write(responseData, 0, responseData.Length);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("ERROR: {0}", e.Message);
-                pipeServer.Close();
-            }
+            //    while ((bytesRead = pipeServer.Read(buffer, 0, buffer.Length)) > 0)
+            //    {
+            //        string input = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            //        Debug.WriteLine("Received from client: " + input);
+            //        pipeView.MessageIncome += "\nReceived message from Client:" + input + '\n';
+
+            //        // Send a response (optional)
+            //        string response = "Received input: " + input;
+            //        byte[] responseData = Encoding.UTF8.GetBytes(response);
+            //        pipeServer.Write(responseData, 0, responseData.Length);
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    Debug.WriteLine("ERROR: {0}", e.Message);
+            //    pipeServer.Close();
+            //}
             
 
             //try
