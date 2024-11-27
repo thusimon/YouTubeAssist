@@ -24,4 +24,5 @@ rem Create host config json file
 echo The host config file has been written to %HostConfigFile%
 
 %SystemRoot%\System32\reg.exe ADD "HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\%name%" /ve /t REG_SZ /d "%HostConfigFile%" /f
+%SystemRoot%\System32\reg.exe ADD "HKEY_CURRENT_USER\Software\Microsoft\Edge\NativeMessagingHosts\%name%" /ve /t REG_SZ /d "%HostConfigFile%" /f
 echo HKEY_CURRENT_USER registry has been updated

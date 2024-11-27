@@ -68,7 +68,7 @@ namespace YouTubeAssist.UI
 
         private void Send_Button_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine(MessageOutput);
+            pipeServer.sendMessage(MessageOutput);
         }
     }
 }
