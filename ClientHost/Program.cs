@@ -32,8 +32,7 @@ RequestMessage? ReadStdInput()
 
 void WriteStdOut(string resp)
 {
-    ResponseMessage responseMessage = new ResponseMessage();
-    responseMessage.resp = resp;
+    ResponseMessage responseMessage = new ResponseMessage(resp);
     string respOut = JsonSerializer.Serialize<ResponseMessage>(responseMessage);
     Debug.WriteLine("Sending Message:" + respOut);
 
@@ -48,17 +47,25 @@ void WriteStdOut(string resp)
     stdout.Flush();
 }
 
+void Log(string msg, bool showInView = true)
+{
+    Debug.WriteLine(msg);
+    if (showInView)
+    {
+        WriteStdOut(msg);
+    }
+}
 
 try
 {
     NamedPipeClientStream pipeClient = null;
 
-    Debug.WriteLine("Connecting to server...");
+    Log("Connecting to server...", false);
 
     Task connectPipeTask = Task.Run(async () =>
     {
         pipeClient = new NamedPipeClientStream(".", "com.utticus.youtube.assist",
-                        PipeDirection.InOut, PipeOptions.None,
+                        PipeDirection.InOut, PipeOptions.Asynchronous,
                         TokenImpersonationLevel.Impersonation);
 
         await pipeClient.ConnectAsync(5000);
@@ -69,13 +76,14 @@ try
             {
                 while (pipeClient.IsConnected)
                 {
-                    //string? message = reader.ReadLine();
-                    //if (!string.IsNullOrEmpty(message))
-                    //{
-                    //    string messageLog = $"Received from Native app: {message}\n";
-                    //    Debug.WriteLine(messageLog);
-                    //}
+                    string? message = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        Debug.WriteLine($"Received from Native app: {message}\n");
+                        WriteStdOut(message);
+                    }
                 }
+                Log("pipeClient is disconnected");
             }
         });
     });

@@ -8,6 +8,13 @@ namespace ClientHost
 {
     internal class RequestMessage
     {
-        public string req {  get; set; }
+        public string? req {  get; set; }
+
+        public RequestMessage(string requestMessage)
+        {
+            req = requestMessage;
+        }
+
+        public RequestMessage() { }
     }
 }

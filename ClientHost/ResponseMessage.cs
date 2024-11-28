@@ -8,6 +8,13 @@ namespace ClientHost
 {
     internal class ResponseMessage
     {
-        public string resp { get; set; }
+        public string? resp { get; set; }
+
+        public ResponseMessage(string responseMessage)
+        {
+            resp = responseMessage;
+        }
+
+        public ResponseMessage() { }
     }
 }

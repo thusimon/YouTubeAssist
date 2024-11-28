@@ -56,9 +56,9 @@ const portControlClickHandler = async (event) => {
     console.log('connection created', p);
 
     p.onMessage.addListener((msg) => {
-      console.log('get native msg', msg);
+      console.log('From Native', msg);
       const {resp} = msg;
-      log(resp);
+      log(`From Native: ${resp}`);
     }); 
     p.onDisconnect.addListener((msg) => {
       console.log('disconnected', msg);

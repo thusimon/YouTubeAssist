@@ -19,13 +19,13 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
-                <Label x:Name="from_host_label" Content="From Host:"/>
+                <Label x:Name="from_webext_label" Content="From WebExt:"/>
             </Grid>
             <Grid Grid.Row="1" HorizontalAlignment="Stretch">
-                <TextBox x:Name="from_host_textBox"
+                <TextBox x:Name="from_webext_textBox"
                          Style="{StaticResource BaseTextBoxStyle}"
                          Text="{Binding Path=MessageIncome}"
-                         AutomationProperties.LabeledBy="{Binding ElementName=from_host_label}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=from_webext_label}"
                          TextWrapping="Wrap"
                          HorizontalAlignment="Center"
                          VerticalAlignment="Stretch"
@@ -42,13 +42,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
-                <Label x:Name="to_host_label" Content="To Host:"/>
+                <Label x:Name="to_webext_label" Content="To WebExt:"/>
             </Grid>
             <Grid Grid.Row="1">
-                <TextBox x:Name="to_host_textBox"
+                <TextBox x:Name="to_webext_textBox"
                          Style="{StaticResource BaseTextBoxStyle}"
                          Text="{Binding Path=MessageOutput}"
-                         AutomationProperties.LabeledBy="{Binding ElementName=to_host_label}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=to_webext_label}"
                          TextWrapping="NoWrap"
                          HorizontalAlignment="Center"
                          Width="700" Height="Auto"

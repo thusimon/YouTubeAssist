@@ -14,13 +14,9 @@ namespace YouTubeAssist.Services
         NamedPipeServerStream pipeServer = null;
         public PipeServer(PipeView pv)
         {
-            Debug.WriteLine("\n*** Named pipe server stream with impersonation example ***\n");
-            Debug.WriteLine("Waiting for client connect...\n");
-
             pipeView = pv;
-            pipeView.MessageIncome += "\n*** Named pipe server stream with impersonation example ***\n";
-            pipeView.MessageIncome += "\nWaiting for client connect...\n";
-
+            Log("*** Named pipe server stream with impersonation example ***");
+            Log("Waiting for client connect...");
             startPipeServer();
         }
 
@@ -31,13 +27,11 @@ namespace YouTubeAssist.Services
                 try
                 {
                     // Create the named pipe
-                    using (pipeServer = new NamedPipeServerStream("com.utticus.youtube.assist", PipeDirection.InOut, 1, PipeTransmissionMode.Message))
+                    using (pipeServer = new NamedPipeServerStream("com.utticus.youtube.assist", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous))
                     {
                         await pipeServer.WaitForConnectionAsync(); // Block until a client connects
 
-                        string connectLog = $"\nClient connected on thread [{Thread.CurrentThread.ManagedThreadId}] as user {pipeServer.GetImpersonationUserName()}\n";
-                        Debug.WriteLine(connectLog);
-                        pipeView.MessageIncome += connectLog;
+                        Log($"Client connected on thread [{Thread.CurrentThread.ManagedThreadId}] as user {pipeServer.GetImpersonationUserName()}");
 
                         // Read and process messages
                         // Start reading and processing messages
@@ -48,18 +42,16 @@ namespace YouTubeAssist.Services
                                 string message = reader.ReadLine();
                                 if (!string.IsNullOrEmpty(message))
                                 {
-                                    string messageLog = $"Received from WebExt: {message}\n";
-                                    Debug.WriteLine(messageLog);
-
-                                    pipeView.MessageIncome += messageLog;
+                                    Log($"From WebExt: {message}");
                                 }
                             }
+                            Log("pipeServer is disconnected");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Pipe server error: {ex.Message}");
+                    Log($"Pipe server error: {ex.Message}");
                 }
             });
 
@@ -69,13 +61,13 @@ namespace YouTubeAssist.Services
         {
             if (string.IsNullOrEmpty(message))
             {
-                Debug.WriteLine("empty message to send, exit");
+                Log("can not send empty message");
                 return;
             }
 
             if (pipeServer == null || !pipeServer.IsConnected)
             {
-                Debug.WriteLine("pipeServer not connected, exit");
+                Log("pipeServer not connected, can not send message");
                 return;
             }
 
@@ -88,9 +80,23 @@ namespace YouTubeAssist.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("Error: " + ex.Message);
+                    Log($"Error: {ex.Message}");
                 }
             }
-        } 
+        }
+        
+        private void Log(string message, bool showInView)
+        {
+            Debug.WriteLine(message);
+            if (showInView)
+            {
+                pipeView.MessageIncome += $"{message}\n";
+            }
+        }
+
+        private void Log(string message)
+        {
+            Log(message, true);
+        }
     }
 }
