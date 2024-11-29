@@ -12,6 +12,7 @@ namespace YouTubeAssist.Services
         public string messageOutcome = "";
         public PipeView pipeView;
         NamedPipeServerStream pipeServer = null;
+        MessageHandler messageHandler;
         public PipeServer(PipeView pv)
         {
             pipeView = pv;
@@ -33,6 +34,8 @@ namespace YouTubeAssist.Services
 
                         Log($"Client connected on thread [{Thread.CurrentThread.ManagedThreadId}] as user {pipeServer.GetImpersonationUserName()}");
 
+                        messageHandler = new MessageHandler(pipeServer);
+
                         // Read and process messages
                         // Start reading and processing messages
                         using (var reader = new StreamReader(pipeServer, Encoding.UTF8, leaveOpen: true))
@@ -43,6 +46,7 @@ namespace YouTubeAssist.Services
                                 if (!string.IsNullOrEmpty(message))
                                 {
                                     Log($"From WebExt: {message}");
+                                    messageHandler.handleMessage(message);
                                 }
                             }
                             Log("pipeServer is disconnected");

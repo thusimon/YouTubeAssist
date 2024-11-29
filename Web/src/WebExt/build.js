@@ -2,23 +2,23 @@ const esbuild = require('esbuild');
 const {copy} = require('esbuild-plugin-copy');
 const sassPlugin = require("esbuild-plugin-sass");
 
+const base='./src/WebExt';
 
 esbuild.build({
   entryPoints: [
-    './src/popup/popup.ts',
-    './src/service-worker.ts'
+    `${base}/popup/popup.ts`,
+    `${base}/service-worker.ts`
   ],
   bundle: true,
   format: 'esm',
   entryNames: '[dir]/[name]',
-  outbase: 'src',
-  outdir: './build',
+  outdir: './build-ext',
   plugins: [
     copy({
       resolveFrom: 'cwd',
       assets: {
-        from: ['./src/**/*.html', './src/manifest.json', './src/**/*.png'],
-        to: ['./build'],
+        from: [`${base}/**/*.html`, `${base}/manifest.json`, `${base}/**/*.png`],
+        to: ['./build-ext']
       },
     }),
     sassPlugin(),

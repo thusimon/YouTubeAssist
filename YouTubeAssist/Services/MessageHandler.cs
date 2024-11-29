@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,14 +10,27 @@ namespace YouTubeAssist.Services
 {
     class MessageHandler
     {
-        private StreamString ss;
-        public MessageHandler(StreamString str) {
-            ss = str;
+        NamedPipeServerStream PipeServerStream;
+        public MessageHandler(NamedPipeServerStream p) {
+            PipeServerStream = p;
         }
-        public void Start()
+
+        public void handleMessage(string message)
         {
-            string contents = "hello from service pipe";
-            ss.WriteString(contents);
+            switch (message)
+            {
+                case "WebExt::Auth":
+                    handleAuthenticate();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void handleAuthenticate()
+        {
+            bool authResult = CredService.Authenticate();
+            Debug.WriteLine($"Auth Result: {authResult}");
         }
     }
 }
