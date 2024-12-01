@@ -76,8 +76,18 @@ body {
     .authenticate-container {
       margin-top: 6px;
 
+      .normal {
+        background-color: lightblue;
+      }
+
+      .success {
+        background-color: lightgreen;
+      }
+
+      .fail {
+        background-color: lightpink;
+      }
       button {
-        background-color: burlywood;
         cursor: pointer;
         height: 2rem;
         display: flex;

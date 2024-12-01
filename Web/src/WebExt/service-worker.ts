@@ -5,20 +5,24 @@ let p = null;
 const HOST_NAME='com.utticus.youtube.assist.host';
 
 const disposePort = () => {
-  if (!p) {
-    return;
-  }
-  try {
-    p.disconnect();
-    p = null;
-  } catch (e) {
-    console.log(`Error: ${e.message}`);
+  if (p) {
+    try {
+      p.disconnect();
+      p = null;
+      chrome.runtime.sendMessage({req: 'sw-port-dispose', data: 'port disposed'});
+    } catch (e) {
+      console.log(`Error: ${e.message}`);
+    }
   }
 }
 
 const createPort = async () => {
   if (p) {
-    chrome.runtime.sendMessage({req: 'sw-port-create', error: 'Port exists, can not re-create'});
+    chrome.runtime.sendMessage({
+      req: 'sw-port-create',
+      error: 'port_exists',
+      detail:'Port exists, can not re-create'
+    });
     return;
   }
   const port = new Port(HOST_NAME);
@@ -64,32 +68,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-
-// const port = new Port(HOST_NAME);
-
-// p = await port.connect();
-// console.log('connection created', p);
-
-// p.onMessage.addListener((msg) => {
-//   console.log('get native msg', msg);
-// });
-// p.onDisconnect.addListener((msg) => {
-//   console.log('disconnected', msg);
-// });
-
-// p.postMessage({text: 'Hello, my_application'});
-
-// chrome.runtime.sendNativeMessage(
-//   HOST_NAME,
-//   {msg: 'hello'},
-//   function (response) {
-//     if (chrome.runtime.lastError) {
-//       console.error("Error:", chrome.runtime.lastError.message);
-//     } else {
-//         console.log("Received response:", response);
-//     }
-//   }
-// );
+chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+  const {req, data} = message;
+  switch(req) {
+    case 'webapp-port-message':
+      //messagePort(data);
+      break;
+    defaut:
+      break;
+  }
+});
 
 if (chrome.runtime.lastError) {
   console.error(chrome.runtime.lastError);

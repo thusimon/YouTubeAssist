@@ -4,8 +4,10 @@ const PORT = 3000;
 
 const app = express()
 
-app.get('/', function (req, res) {
-  res.send('Hello World');
+app.use(express.static('build/WebApp/public'));
+
+app.get('/', function(req, res) {
+  res.sendFile('/index.html', { root: 'build/WebApp/public' });
 });
 
 app.listen(PORT, () => {

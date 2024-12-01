@@ -61,30 +61,97 @@ btnToNativeE.addEventListener('click', () => {
   chrome.runtime.sendMessage({req: 'pop-port-message', data: msg});    
 });
 
-let authStatus = 0; // 0: idle, 1: in progress
+/**
+ * 0: idle
+ * 1: in progress
+ * 2: success
+ * 3: fail
+ */
+let authStatus = 0;
 btnAuth.addEventListener('click', (evt) => {
-  if (authStatus === 1) {
+  if (authStatus != 0) {
     console.log('still in auth progress, please wait');
     return;
   }
   authStatus = 1;
   //btnAuth.disabled = true;
-  btnAuthText.textContent = 'Authenticating';
-  btnAuthLoader.classList.replace('hide', 'show');
+  setBtnAuthStatus(authStatus);
   chrome.runtime.sendMessage({req: 'pop-port-message', data: 'WebExt::Auth:request'}); 
 })
+
+const setBtnAuthStatus = (authStatus) => {
+  switch (authStatus) {
+    case 0: {
+      btnAuth.className = 'normal';
+      btnAuthText.textContent = 'Authenticate by Windows Hello';
+      btnAuthLoader.classList.replace('show', 'hide');
+      break;
+    }
+    case 1: {
+      btnAuth.className = 'normal';
+      btnAuthText.textContent = 'Authenticating';
+      btnAuthLoader.classList.replace('hide', 'show');
+      break;
+    }
+    case 2: {
+      btnAuth.className = 'success';
+      btnAuthText.textContent = '✔Authenication Success';
+      btnAuthLoader.classList.replace('show', 'hide');
+      break;
+    }
+    case 3: {
+      btnAuth.className = 'fail';
+      btnAuthText.textContent = '✘Authenication Failed';
+      btnAuthLoader.classList.replace('show', 'hide');
+      break;
+    }
+    default:
+      break;
+  }
+} 
+
+const handleMessage = (msg) => {
+  switch (msg) {
+    case 'WebExt::Auth:True':
+      authStatus = 2
+      setBtnAuthStatus(authStatus);
+      break;
+    case 'WebExt::Auth:False':
+      authStatus = 3
+      setBtnAuthStatus(authStatus);
+      break;
+    default:
+      break;
+  }
+};
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const {req, data, error} = message;
   switch(req) {
-    case 'sw-port-msg':
+    case 'sw-port-msg': {
       log(`From Native: ${data}`);
+      handleMessage(data.trim());
       break;
-    case 'sw-port-close':
+    }
+    case 'sw-port-create': {
+      if (error === 'port_exists') {
+        portConnectBtnE.disabled = true;
+      }
       break;
+    }
+    case 'sw-port-dispose': {
+      portConnectBtnE.disabled = false;
+      break;
+    }
+    case 'sw-port-close': {
+      break;
+    }
     defaut:
       break;
   }
 });
+
+// create port when page is opened
+chrome.runtime.sendMessage({req: 'pop-port-create'});
 
 console.log('popup opened');
