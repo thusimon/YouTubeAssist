@@ -11,15 +11,17 @@ namespace YouTubeAssist.Services
     class MessageHandler
     {
         NamedPipeServerStream PipeServerStream;
+        CredService credService;
         public MessageHandler(NamedPipeServerStream p) {
             PipeServerStream = p;
+            credService = new CredService();
         }
 
         public void handleMessage(string message)
         {
             switch (message)
             {
-                case "WebExt::Auth":
+                case "WebExt::Auth:request":
                     handleAuthenticate();
                     break;
                 default:
@@ -27,9 +29,9 @@ namespace YouTubeAssist.Services
             }
         }
 
-        private void handleAuthenticate()
+        private async void handleAuthenticate()
         {
-            bool authResult = CredService.Authenticate();
+            bool authResult = await credService.Authenticate();
             Debug.WriteLine($"Auth Result: {authResult}");
         }
     }

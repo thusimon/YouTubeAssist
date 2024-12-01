@@ -5,108 +5,71 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using Windows.Security.Credentials.UI;
 
 namespace YouTubeAssist.Services
 {
     internal class CredService
     {
-        [DllImport("credui.dll", CharSet = CharSet.Unicode)]
-        private static extern int CredUIPromptForWindowsCredentials(
-            ref CREDUI_INFO credInfo,
-            int authError,
-            ref uint authPackage,
-            IntPtr inAuthBuffer,
-            uint inAuthBufferSize,
-            out IntPtr outAuthBuffer,
-            out uint outAuthBufferSize,
-            ref bool save,
-            uint flags);
-
-        [DllImport("credui.dll", CharSet = CharSet.Unicode)]
-        private static extern bool CredUnPackAuthenticationBuffer(
-            uint flags,
-            IntPtr authBuffer,
-            uint authBufferSize,
-            StringBuilder username,
-            ref uint usernameSize,
-            StringBuilder domainName,
-            ref uint domainNameSize,
-            StringBuilder password,
-            ref uint passwordSize);
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern void CredFree(IntPtr buffer);
-
-        private const uint CREDUIWIN_GENERIC = 0x1;
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct CREDUI_INFO
+        private async Task<bool> IsWindowsHelloAvailableAsync()
         {
-            public int cbSize;
-            public IntPtr hwndParent;
-            public string pszMessageText;
-            public string pszCaptionText;
-            public IntPtr hbmBanner;
+            try
+            {
+                // Check if Windows Hello is available
+                var availabilityInfo = await UserConsentVerifier.CheckAvailabilityAsync();
+                return availabilityInfo == UserConsentVerifierAvailability.Available;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public static bool Authenticate()
+        private async Task<bool> PerformWindowsHelloAuthenticationAsync()
         {
-            var credInfo = new CREDUI_INFO
+            try
             {
-                cbSize = Marshal.SizeOf(typeof(CREDUI_INFO)),
-                hwndParent = IntPtr.Zero,
-                pszMessageText = "Please authenticate with your Windows Hello credentials.",
-                pszCaptionText = "Windows Hello Authentication",
-                hbmBanner = IntPtr.Zero
-            };
+                // Prompt for Windows Hello authentication
+                var verificationResult = await UserConsentVerifier.RequestVerificationAsync("WebExt needs to verify your identity using Windows Hello");
 
-            uint authPackage = 0;
-            IntPtr outAuthBuffer = IntPtr.Zero;
-            uint outAuthBufferSize = 0;
-            bool save = false;
-
-            int result = CredUIPromptForWindowsCredentials(
-                ref credInfo,
-                0, // No specific error
-                ref authPackage,
-                IntPtr.Zero,
-                0,
-                out outAuthBuffer,
-                out outAuthBufferSize,
-                ref save,
-                CREDUIWIN_GENERIC);
-
-            if (result == 0) // ERROR_SUCCESS
-            {
-                var username = new StringBuilder(256);
-                var password = new StringBuilder(256);
-                uint usernameSize = 256, passwordSize = 256;
-                var domainName = new StringBuilder(256);
-                uint domainNameSize = 256;
-
-                if (CredUnPackAuthenticationBuffer(
-                    0,
-                    outAuthBuffer,
-                    outAuthBufferSize,
-                    username,
-                    ref usernameSize,
-                    domainName,
-                    ref domainNameSize,
-                    password,
-                    ref passwordSize))
+                // Map the verification result to a boolean
+                switch (verificationResult)
                 {
-                    Debug.WriteLine($"Username: {username}");
-                    Debug.WriteLine($"Domain: {domainName}");
-                    Debug.WriteLine($"Password: {password}");
+                    case UserConsentVerificationResult.Verified:
+                        return true;
+                    case UserConsentVerificationResult.DeviceNotPresent:
+                    case UserConsentVerificationResult.Canceled:
+                    case UserConsentVerificationResult.DisabledByPolicy:
+                    default:
+                        return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> Authenticate()
+        {
+            try
+            {
+                // Check if Windows Hello is available
+                if (!await IsWindowsHelloAvailableAsync())
+                {
+                    Debug.WriteLine("Windows Hello is not avaliable");
+                    return false;
                 }
 
-                // Free the allocated authentication buffer
-                CredFree(outAuthBuffer);
-                return true;
+                // Perform Windows Hello authentication
+                var authResult = await PerformWindowsHelloAuthenticationAsync();
+
+                return authResult;
             }
-            else
+            catch (Exception ex)
             {
-                Debug.WriteLine("Authentication was canceled or failed.");
+                Debug.WriteLine($"Windows Hello error {ex.Message}");
                 return false;
             }
         }

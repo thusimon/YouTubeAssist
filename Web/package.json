@@ -1,9 +1,12 @@
 {
-  "name": "WebExt-NativeMessage",
+  "name": "Web-NativeMessage",
   "version": "0.0.1",
   "packageManager": "yarn@4.5.0",
   "engines": {
     "node": ">=20.10.0"
+  },
+  "dependencies": {
+    "express": "^4.21.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.279",
@@ -14,6 +17,8 @@
     "typescript": "^5.6.3"
   },
   "scripts": {
-    "build-ext": "node src/WebExt/build.js"
+    "build-ext": "node src/WebExt/build.js",
+    "build-app": "yarn tsc src/WebApp/server.ts --outDir build/WebApp && node src/WebApp/build.js",
+    "start-server": "node build/WebApp/server.js"
   }
 }

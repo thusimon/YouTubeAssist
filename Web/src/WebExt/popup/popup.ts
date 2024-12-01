@@ -15,6 +15,9 @@ const portDisconnectBtnE = document.getElementById('port-btn-disconnect');
 const textFromNativeE = document.getElementById('from-native-text');
 const textToNativeE = document.getElementById('to-native-text');
 const btnToNativeE = document.getElementById('to-native-btn');
+const btnAuth = document.getElementById('auth-win-btn');
+const btnAuthText = document.getElementById('auth-btn-text');
+const btnAuthLoader = document.getElementById('auth-btn-loader');
 
 const log = (message) => {
   textFromNativeE.value += message + '\n';
@@ -36,40 +39,12 @@ for (const tabLink of tabLinksE) {
   tabLink.addEventListener('click', tabLinkClickHandler);
 }
 
-let p = null;
-const HOST_NAME='com.utticus.youtube.assist.host'
-
 const portControlClickHandler = async (event) => {
   const id = event.target.id;
-  if (p != null && id === 'port-btn-connect') {
-    console.log('port is still in use, can not connect');
-    return;
-  }
-  if (p == null && id === 'port-btn-disconnect') {
-    console.log('port is already disconnected, can not disconnect');
-    return;
-  }
-
   if (id === 'port-btn-connect') {
-    const port = new Port(HOST_NAME);
-    p = await port.connect();
-    console.log('connection created', p);
-
-    p.onMessage.addListener((msg) => {
-      console.log('From Native', msg);
-      const {resp} = msg;
-      log(`From Native: ${resp}`);
-    }); 
-    p.onDisconnect.addListener((msg) => {
-      console.log('disconnected', msg);
-    });
-
-    return;
-  }
-
-  if (id === 'port-btn-disconnect') {
-    p.disconnect();
-    p = null;
+    chrome.runtime.sendMessage({req: 'pop-port-create'});
+  } else if (id === 'port-btn-disconnect') {
+    chrome.runtime.sendMessage({req: 'pop-port-dispose'});
   }
   
 }
@@ -77,18 +52,39 @@ portConnectBtnE.addEventListener('click', portControlClickHandler);
 portDisconnectBtnE.addEventListener('click', portControlClickHandler);
 
 btnToNativeE.addEventListener('click', () => {
-  if (p == null) {
-    console.log('port is null, can not send message');
-    return;
-  }
-  const req = textToNativeE.value;
+  const msg = textToNativeE.value;
 
-  if (!req) {
+  if (!msg) {
     return;
   }
 
-  p.postMessage({req});
-    
+  chrome.runtime.sendMessage({req: 'pop-port-message', data: msg});    
+});
+
+let authStatus = 0; // 0: idle, 1: in progress
+btnAuth.addEventListener('click', (evt) => {
+  if (authStatus === 1) {
+    console.log('still in auth progress, please wait');
+    return;
+  }
+  authStatus = 1;
+  //btnAuth.disabled = true;
+  btnAuthText.textContent = 'Authenticating';
+  btnAuthLoader.classList.replace('hide', 'show');
+  chrome.runtime.sendMessage({req: 'pop-port-message', data: 'WebExt::Auth:request'}); 
+})
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const {req, data, error} = message;
+  switch(req) {
+    case 'sw-port-msg':
+      log(`From Native: ${data}`);
+      break;
+    case 'sw-port-close':
+      break;
+    defaut:
+      break;
+  }
 });
 
 console.log('popup opened');

@@ -73,5 +73,46 @@ body {
         width: 100%;
       }
     }
+    .authenticate-container {
+      margin-top: 6px;
+
+      button {
+        background-color: burlywood;
+        cursor: pointer;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        margin: auto;
+
+        #auth-btn-text {
+          margin: 0px 6px;
+        }
+
+        .hide {
+          display: none;
+        }
+        .show {
+          display: inline-block
+        }
+        .loader {
+          width: 1.2rem;
+          height: 1.2rem;
+          border: 3px solid #0e0e0e;
+          border-bottom-color: transparent;
+          border-radius: 50%;
+          box-sizing: border-box;
+          animation: rotation 1s linear infinite;
+        }
+      
+        @keyframes rotation {
+          0% {
+              transform: rotate(0deg);
+          }
+          100% {
+              transform: rotate(360deg);
+          }
+        }
+      }
+    }
   }
 }
