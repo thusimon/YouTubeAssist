@@ -14,14 +14,8 @@ Mainly contains these sections
 Open the `YouTubeAssist.sln` in visual studio and build the solution
 
 ### YoutubeAssist WPF
-* This project need windows 11 SDK(10.0.26100.0), which can be installed from visual studio installer -> Individual components
-* Please create a `App.Secrets.config` file at the same level of the `App.config`, the content is
-  ```
-  <appSettings>
-    <!-- The native messaging part doesn't need this key, you can leave an empty string value -->
-    <add key="ApiKey" value="Youtube data API key" />
-  </appSettings>
-  ```
+This project need windows 11 SDK(10.0.26100.0), which can be installed from visual studio installer -> Individual components
+
 ### ClientHost console
 This app will use a `post-build.bat` file to write registry key according to this [browser extension nativeMessaging documentation](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location)
 
@@ -44,11 +38,11 @@ The browser extension and web app will be in the `build` folder, then load the e
 * Click the `Authenticate by Windows Hello` button on popup, you will be prompted by windows hello challenge
 
   <img src="Web/demo/message_passing_win_hello_auth.png"
-    width="500" height="auto"
+    width="600" height="auto"
     title="Messaging and authentication with windows hello"
     alt="Messaging and authentication with windows hello"/>
 
   <img src="Web/demo/win_hello_success.png"
-    width="500" height="auto"
+    width="600" height="auto"
     title="Windows hello authentication success"
     alt="Windows hello authentication success"/>

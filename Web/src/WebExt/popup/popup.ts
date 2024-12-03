@@ -95,13 +95,13 @@ const setBtnAuthStatus = (authStatus) => {
     }
     case 2: {
       btnAuth.className = 'success';
-      btnAuthText.textContent = '✔Authenication Success';
+      btnAuthText.textContent = 'Authenication Success✔';
       btnAuthLoader.classList.replace('show', 'hide');
       break;
     }
     case 3: {
       btnAuth.className = 'fail';
-      btnAuthText.textContent = '✘Authenication Failed';
+      btnAuthText.textContent = 'Authenication Failed✘';
       btnAuthLoader.classList.replace('show', 'hide');
       break;
     }
