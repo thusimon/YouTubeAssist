@@ -7,7 +7,22 @@ const btnAuth = document.getElementById('auth-win-btn');
 const btnAuthText = document.getElementById('auth-btn-text');
 const btnAuthLoader = document.getElementById('auth-btn-loader');
 
-
+const setCaption = (authStatus) => {
+  switch (authStatus) {
+    case 1: {
+      captionE.textContent = "Please complete challenge..."
+      break;
+    }
+    case 2: {
+      captionE.textContent = "Welcome!"
+      break;
+    }
+    case 3: {
+      captionE.textContent = "Access denied!"
+      break;
+    }
+  }
+}
 const setBtnAuthStatus = (authStatus) => {
   switch (authStatus) {
     case 0: {
@@ -46,13 +61,22 @@ const setBtnAuthStatus = (authStatus) => {
  * 3: fail
  */
 let authStatus = 0;
-btnAuth.addEventListener('click', (evt) => {
+btnAuth.addEventListener('click', async (evt) => {
   if (authStatus != 0) {
     console.log('still in auth progress, please wait');
     return;
   }
   authStatus = 1;
   //btnAuth.disabled = true;
+  setCaption(authStatus);
   setBtnAuthStatus(authStatus);
-  chrome.runtime.sendMessage(WEBEXT_GUID, {req: 'webapp-port-message', data: 'WebExt::Auth:request'});
+  const authResult = await chrome.runtime.sendMessage(WEBEXT_GUID, {req: 'webapp-port-message', data: 'WebExt::Auth:request'});
+
+  if (authResult === 'WebExt::Auth:True') {
+    authStatus = 2
+  } else if (authResult === 'WebExt::Auth:False') {
+    authStatus = 3
+  }
+  setCaption(authStatus);
+  setBtnAuthStatus(authStatus);
 });

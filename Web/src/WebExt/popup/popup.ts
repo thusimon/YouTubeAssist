@@ -130,7 +130,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch(req) {
     case 'sw-port-msg': {
       log(`From Native: ${data}`);
-      handleMessage(data.trim());
+      handleMessage(data);
       break;
     }
     case 'sw-port-create': {

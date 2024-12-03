@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -16,14 +17,20 @@ namespace YouTubeAssist.Services
 
         public void handleMessage(string message)
         {
-            if (string.Equals(message, "WebExt::Auth:request", StringComparison.InvariantCulture))
+            if (message != null && message.StartsWith("WebExt::Auth:request"))
             {
-                handleAuthenticate();
+                string[] messageParts = message.Split("_");
+                string? uuid = null;
+                if (messageParts.Length == 2)
+                {
+                    uuid = messageParts[1];
+                }
+                handleAuthenticate(uuid);
                 return;
             }
         }
 
-        private async void handleAuthenticate()
+        private async void handleAuthenticate(string? uuid)
         {
             bool authResult = await credService.Authenticate();
             if (PipeServerStream != null && PipeServerStream.IsConnected)
@@ -32,8 +39,13 @@ namespace YouTubeAssist.Services
                 {
                     try
                     {
-                        writer.WriteLine($"WebExt::Auth:{authResult}");
-                        Debug.WriteLine($"Write to pipeServer {authResult}");
+                        string respMessage = $"WebExt::Auth:{authResult}";
+                        if (!string.IsNullOrEmpty(uuid))
+                        {
+                            respMessage = $"{respMessage}_{uuid}";
+                        }
+                        writer.WriteLine(respMessage);
+                        Debug.WriteLine($"Write to pipeServer {respMessage}");
                     }
                     catch (Exception ex)
                     {

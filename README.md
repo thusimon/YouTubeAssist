@@ -24,18 +24,20 @@ This app will use a `post-build.bat` file to write registry key according to thi
 * Install yarn 4.5 according to [installation doc](https://yarnpkg.com/getting-started/install)
 * Go to the `Web` directory, run these command
   - `yarn install`
-  - `yarn build-ext`
-  - `yarn build-app`
+  - `yarn build-ext` #build brower extension
+  - `yarn build-app` #build web app
 
 The browser extension and web app will be in the `build` folder, then load the extension from chrome://extensions/ developer mode
 
 # Usage
-* Build the ClientHost app, YoutubeAssist WPF, WebExtension, and load WebExtension in Chrome/Edge
+* Build the ClientHost app, YoutubeAssist WPF, WebExtension, WebApp
+* load WebExtension in Chrome/Edge, and run `yarn start-server` under the `Web` directory
 * Launch the YoutubeAssist WPF
 * Open browser extension popup, a port would be created by using `chrome.runtime.connectNative` and connect to the WPF.
   - In windows task manager, a `ClientHost` process will also be created
 * Send messages between WPF and browser extension
-* Click the `Authenticate by Windows Hello` button on popup, you will be prompted by windows hello challenge
+* Click the `Authenticate by Windows Hello` button on popup, windows hello challenge will prompt
+* Open a new tab and go to `http://localhost:3000`, click the Click the `Authenticate by Windows Hello` button on the web page, windows hello challenge will prompt
 
   <img src="Web/demo/message_passing_win_hello_auth.png"
     width="600" height="auto"

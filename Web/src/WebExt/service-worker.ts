@@ -3,6 +3,7 @@ import Port from './utils/port';
 let p = null;
 
 const HOST_NAME='com.utticus.youtube.assist.host';
+const promiseMap = {};
 
 const disposePort = () => {
   if (p) {
@@ -30,8 +31,24 @@ const createPort = async () => {
   console.log('port created', p);
 
   p.onMessage.addListener((msg) => {
-    const {resp} = msg;
+    let {resp} = msg;
     console.log('From Native', msg);
+    resp = resp.trim();
+    if (resp.startsWith('WebExt::Auth:')) {
+      // try to parse the UUID
+      const respParts = resp.split('_');
+      if (respParts[1]) {
+        // this is for WebApp
+        const UUID = respParts[1];
+        const deferred = promiseMap[UUID];
+        if (deferred) {
+          deferred.resolve(respParts[0]);
+        }
+        delete promiseMap[UUID];
+        return;
+      }
+    }
+
     chrome.runtime.sendMessage({req: 'sw-port-msg', data: resp});
   }); 
   p.onDisconnect.addListener((msg) => {
@@ -70,10 +87,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   const {req, data} = message;
+  const tabId = sender?.tab?.id;
+  const origin = sender?.origin;
+  const uuid = `${tabId}-${origin}`
   switch(req) {
-    case 'webapp-port-message':
-      //messagePort(data);
-      break;
+    case 'webapp-port-message': {
+      const dataExt = `${data}_${uuid}`
+      messagePort(dataExt);
+      const deferred = Promise.withResolvers();
+      promiseMap[uuid] = deferred;
+      deferred.promise.then((result) => {
+        sendResponse(result);
+      });
+      return true;
+    }
     defaut:
       break;
   }
