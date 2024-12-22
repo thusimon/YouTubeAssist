@@ -5,12 +5,21 @@ let p = null;
 const HOST_NAME='com.utticus.youtube.assist.host';
 const promiseMap = {};
 
+
+const sendMessageToPop = (action, data = undefined, error = undefined) => {
+  const message = {
+    type: 'SW_TO_POP',
+    action,
+    data,
+  };
+  chrome.runtime.sendMessage(message);
+}
 const disposePort = () => {
   if (p) {
     try {
       p.disconnect();
       p = null;
-      chrome.runtime.sendMessage({req: 'sw-port-dispose', data: 'port disposed'});
+      sendMessageToPop('PORT_DISPOSE', 'port disposed');
     } catch (e) {
       console.log(`Error: ${e.message}`);
     }
@@ -19,66 +28,95 @@ const disposePort = () => {
 
 const createPort = async () => {
   if (p) {
-    chrome.runtime.sendMessage({
-      req: 'sw-port-create',
-      error: 'port_exists',
-      detail:'Port exists, can not re-create'
-    });
+    sendMessageToPop('PORT_CREATE', undefined, 'Port exists, can not re-create');
     return;
   }
   const port = new Port(HOST_NAME);
   p = await port.connect();
   console.log('port created', p);
 
-  p.onMessage.addListener((msg) => {
-    let {resp} = msg;
-    console.log('From Native', msg);
-    resp = resp.trim();
-    if (resp.startsWith('WebExt::Auth:')) {
-      // try to parse the UUID
-      const respParts = resp.split('_');
-      if (respParts[1]) {
-        // this is for WebApp
-        const UUID = respParts[1];
-        const deferred = promiseMap[UUID];
-        if (deferred) {
-          deferred.resolve(respParts[0]);
+  const handlePortNativeMessage = (action, data, error) => {
+    switch (action) {
+      case 'AUTH': {
+        const UUID = data.UUID;
+        const authResult = data.result;
+        if (UUID) {
+          // this is for WebApp
+          const deferred = promiseMap[UUID];
+          if (deferred) {
+            deferred.resolve(authResult);
+          }
+          delete promiseMap[UUID];
+          return;
+        } else {
+          // this is for Popup
+          sendMessageToPop(action, authResult);
+          return;
         }
-        delete promiseMap[UUID];
-        return;
+      }
+      case 'MESSAGE': {
+        const message = data.message;
+        sendMessageToPop(action, `From Native: ${message}`);
       }
     }
+  }
 
-    chrome.runtime.sendMessage({req: 'sw-port-msg', data: resp});
+  p.onMessage.addListener((msg) => {
+    let {type, action, data, error} = msg;
+    console.log('From Native', msg);
+    switch (type) {
+      case 'HOST_TO_EXT': {
+        handlePortNativeMessage(action, data, error);
+        break;
+      }
+    }
   }); 
   p.onDisconnect.addListener((msg) => {
     console.log('disconnected', msg);
-    chrome.runtime.sendMessage({req: 'sw-port-close', error: msg});
+    sendMessageToPop('PORT_CLOSE', undefined, msg);
   });
 
-  chrome.runtime.sendMessage({req: 'sw-port-create', data: 'port created'});
+  sendMessageToPop('PORT_CREATE', 'port created');
 };
 
-const messagePort = (msg) => {
+const messagePort = (message) => {
   if (!p) {
-    chrome.runtime.sendMessage({req: 'sw-port-msg', error: 'no port, can not send message'});
+    sendMessageToPop('MESSAGE', 'no port, can not send message')
     return;
   }
 
-  p.postMessage({req: msg});
+  const messageToNative = {
+    type: 'EXT_TO_HOST',
+    action: 'MESSAGE',
+    // data to native must be a Dictionary<string, string>
+    data: {
+      message
+    }
+  }
+  p.postMessage(messageToNative);
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const {req, data} = message;
-  switch(req) {
-    case 'pop-port-create':
+
+const handlePopUpMessage = (action, data, error) => {
+  switch(action) {
+    case 'PORT_CREATE':
       createPort();
       break;
-    case 'pop-port-dispose':
+    case 'PORT_DISPOSE':
       disposePort();
       break;
-    case 'pop-port-message':
+    case 'MESSAGE':
       messagePort(data);
+      break;
+    defaut:
+      break;
+  }
+}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const {type, action, data, error} = message;
+  switch(type) {
+    case 'POP_TO_SW':
+      handlePopUpMessage(action, data, error);
       break;
     defaut:
       break;

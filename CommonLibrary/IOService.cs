@@ -1,32 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace ClientHost
+namespace CommonLibrary
 {
-    internal class IOService
+    public class IOService
     {
-        static private string? ReadMessage()
+        static public Message? ReadMessage()
         {
             char[]? buffer = ReadStdInput();
             if (buffer == null)
             {
                 return null;
             }
-            Message? message = JsonSerializer.Deserialize<Message>(new string(buffer));
-            if (message?.type != "IN_MSG")
-            {
-                return null;
-            }
-
-            return message?.data?.GetValueOrDefault("message", null);
-
+            return JsonSerializer.Deserialize<Message>(new string(buffer));
         }
-        static char[]? ReadStdInput()
+
+        static public char[]? ReadStdInput()
         {
             Stream stdin = Console.OpenStandardInput();
 
@@ -49,13 +39,10 @@ namespace ClientHost
             }
         }
 
-        static private void WriteStdOut(string resp)
+        static public void WriteStdOut(string rawMessage)
         {
-            ResponseMessage responseMessage = new ResponseMessage(resp);
-            string respOut = JsonSerializer.Serialize<ResponseMessage>(responseMessage);
-            Debug.WriteLine("Sending Message:" + respOut);
-
-            byte[] bytes = Encoding.UTF8.GetBytes(respOut);
+            Debug.WriteLine("Sending Message:" + rawMessage);
+            byte[] bytes = Encoding.UTF8.GetBytes(rawMessage);
             Stream stdout = Console.OpenStandardOutput();
 
             stdout.WriteByte((byte)((bytes.Length >> 0) & 0xFF));
@@ -64,6 +51,26 @@ namespace ClientHost
             stdout.WriteByte((byte)((bytes.Length >> 24) & 0xFF));
             stdout.Write(bytes, 0, bytes.Length);
             stdout.Flush();
+        }
+        static public void WriteMessage(Message message)
+        {
+            string messageOut = JsonSerializer.Serialize<Message>(message);
+            WriteStdOut(messageOut);
+        }
+        static public string SerializedMessage(Message message)
+        {
+            return JsonSerializer.Serialize(message);
+        }
+
+        static public Message? DeserializedMessage(string message)
+        {
+            // Detect and remove BOM if present
+            if (message[0] == '\uFEFF')
+            {
+                message = message.Substring(1);
+            }
+
+            return JsonSerializer.Deserialize<Message>(message);
         }
     }
 }

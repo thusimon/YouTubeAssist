@@ -1,64 +1,26 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using ClientHost;
+using CommonLibrary;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Security.Principal;
 using System.Text;
-using System.Text.Json;
 
 // https://www.nuget.org/packages/NativeMessaging/#
-RequestMessage? ReadStdInput()
+
+void Log(string log, bool showInView = true)
 {
-    Stream stdin = Console.OpenStandardInput();
-
-    byte[] lengthBytes = new byte[4];
-    stdin.Read(lengthBytes, 0, 4);
-
-    char[] buffer = new char[BitConverter.ToInt32(lengthBytes, 0)];
-
-    using (StreamReader reader = new StreamReader(stdin))
-    {
-        if (reader.Peek() >= 0)
-        {
-            reader.Read(buffer, 0, buffer.Length);
-            return JsonSerializer.Deserialize<RequestMessage>(new string(buffer));
-        }
-        else
-        {
-            return null;
-        }
-    }
-}
-
-void WriteStdOut(string resp)
-{
-    ResponseMessage responseMessage = new ResponseMessage(resp);
-    string respOut = JsonSerializer.Serialize<ResponseMessage>(responseMessage);
-    Debug.WriteLine("Sending Message:" + respOut);
-
-    byte[] bytes = Encoding.UTF8.GetBytes(respOut);
-    Stream stdout = Console.OpenStandardOutput();
-
-    stdout.WriteByte((byte)((bytes.Length >> 0) & 0xFF));
-    stdout.WriteByte((byte)((bytes.Length >> 8) & 0xFF));
-    stdout.WriteByte((byte)((bytes.Length >> 16) & 0xFF));
-    stdout.WriteByte((byte)((bytes.Length >> 24) & 0xFF));
-    stdout.Write(bytes, 0, bytes.Length);
-    stdout.Flush();
-}
-
-void Log(string msg, bool showInView = true)
-{
-    Debug.WriteLine(msg);
+    Debug.WriteLine(log);
     if (showInView)
     {
-        WriteStdOut(msg);
+        
+        Message message = new Message("HOST_TO_EXT", "MESSAGE", new Dictionary<string, string>{ {"message", log} });
+        IOService.WriteMessage(message);
     }
 }
 
 try
 {
-    NamedPipeClientStream pipeClient = null;
+    NamedPipeClientStream? pipeClient = null;
 
     Log("Connecting to server...", false);
 
@@ -76,11 +38,22 @@ try
             {
                 while (pipeClient.IsConnected)
                 {
-                    string? message = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(message))
+                    string? messageBuffer = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(messageBuffer))
                     {
-                        Debug.WriteLine($"Received from Native app: {message}\n");
-                        WriteStdOut(message);
+                        Debug.WriteLine($"Received from Native app: {messageBuffer}");
+
+                        Message? message = IOService.DeserializedMessage(messageBuffer);
+                        if (message == null || message.type != "NATIVE_TO_HOST")
+                        {
+                            Debug.WriteLine("Can not deserialize message or invalid message type");
+                        }
+                        else
+                        {
+                            // update message type
+                            message.type = "HOST_TO_EXT";
+                            IOService.WriteMessage(message);
+                        }
                     }
                 }
                 Log("pipeClient is disconnected");
@@ -88,11 +61,10 @@ try
         });
     });
 
-
-    RequestMessage? requestMessage;
-    while ((requestMessage = ReadStdInput()) != null)
+    Message? message;
+    while ((message = IOService.ReadMessage()) != null)
     {
-        Debug.WriteLine("Get message from WebExt: " + requestMessage.req);
+        Debug.WriteLine($"Get {message.type} from WebExt");
 
         Task writePipeTask = Task.Run(() =>
         {
@@ -100,8 +72,9 @@ try
             {
                 using(var writer = new StreamWriter(pipeClient, Encoding.UTF8, leaveOpen: true) { AutoFlush = true })
                 {
-                    writer.WriteLine(requestMessage.req);
-                    writer.Flush();
+                    // change the message type
+                    message.type = "HOST_TO_NATIVE";
+                    writer.WriteLine(IOService.SerializedMessage(message));
                 }
             }
         });

@@ -1,4 +1,3 @@
-import Port from '../utils/port';
 import "./popup.scss";
 
 const titleLinkE = document.getElementById('popup-link');
@@ -23,6 +22,16 @@ const log = (message) => {
   textFromNativeE.value += message + '\n';
 };
 
+const sendMessageToSW = (action, data = undefined, error = undefined) => {
+  const message = {
+    type: 'POP_TO_SW',
+    action,
+    data,
+    error
+  };
+  chrome.runtime.sendMessage(message);
+}
+
 const tabLinkClickHandler = (event) => {
   for (const tabLinkE of tabLinksE) {
     tabLinkE.classList.remove('active');
@@ -42,9 +51,9 @@ for (const tabLink of tabLinksE) {
 const portControlClickHandler = async (event) => {
   const id = event.target.id;
   if (id === 'port-btn-connect') {
-    chrome.runtime.sendMessage({req: 'pop-port-create'});
+    sendMessageToSW('PORT_CREATE');
   } else if (id === 'port-btn-disconnect') {
-    chrome.runtime.sendMessage({req: 'pop-port-dispose'});
+    sendMessageToSW('PORT_DISPOSE');
   }
   
 }
@@ -57,8 +66,7 @@ btnToNativeE.addEventListener('click', () => {
   if (!msg) {
     return;
   }
-
-  chrome.runtime.sendMessage({req: 'pop-port-message', data: msg});    
+  sendMessageToSW('MESSAGE', msg);
 });
 
 /**
@@ -76,7 +84,8 @@ btnAuth.addEventListener('click', (evt) => {
   authStatus = 1;
   //btnAuth.disabled = true;
   setBtnAuthStatus(authStatus);
-  chrome.runtime.sendMessage({req: 'pop-port-message', data: 'WebExt::Auth:request'}); 
+
+  sendMessageToSW('MESSAGE', 'WebExt::Auth:request') 
 })
 
 const setBtnAuthStatus = (authStatus) => {
@@ -125,33 +134,41 @@ const handleMessage = (msg) => {
   }
 };
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const {req, data, error} = message;
-  switch(req) {
-    case 'sw-port-msg': {
-      log(`From Native: ${data}`);
-      handleMessage(data);
+const handleSWMessage = (action, data, error) => {
+  switch(action) {
+    case 'MESSAGE': {
+      log(data);
       break;
     }
-    case 'sw-port-create': {
-      if (error === 'port_exists') {
-        portConnectBtnE.disabled = true;
+    case 'PORT_CREATE': {
+      portConnectBtnE.disabled = true;
+      if (error) {
+        log(error);
       }
       break;
     }
-    case 'sw-port-dispose': {
+    case 'PORT_DISPOSE': {
       portConnectBtnE.disabled = false;
       break;
     }
-    case 'sw-port-close': {
+    case 'PORT_CLOSE': {
       break;
     }
     defaut:
       break;
   }
+}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const {type, action, data, error} = message;
+  switch (type) {
+    case 'SW_TO_POP': {
+      handleSWMessage(action, data, error);
+      break;
+    }
+  }
 });
 
 // create port when page is opened
-chrome.runtime.sendMessage({req: 'pop-port-create'});
+sendMessageToSW('PORT_CREATE');
 
 console.log('popup opened');

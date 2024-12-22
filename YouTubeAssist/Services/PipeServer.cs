@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 using YouTubeAssist.UI;
+using CommonLibrary;
 
 namespace YouTubeAssist.Services
 {
@@ -11,8 +12,8 @@ namespace YouTubeAssist.Services
         public string messageIncome = "";
         public string messageOutcome = "";
         public PipeView pipeView;
-        NamedPipeServerStream pipeServer = null;
-        MessageHandler messageHandler;
+        NamedPipeServerStream? pipeServer = null;
+        MessageHandler? messageHandler;
         public PipeServer(PipeView pv)
         {
             pipeView = pv;
@@ -79,8 +80,10 @@ namespace YouTubeAssist.Services
             {
                 try
                 {
-                    writer.WriteLine(message);
-                    Debug.WriteLine($"Write to pipeServer {message}");
+                    Message messageObj = new Message("NATIVE_TO_HOST", "MESSAGE", new Dictionary<string, string> { { "message", message } });
+                    string messageToPipe = IOService.SerializedMessage(messageObj);
+                    writer.WriteLine(messageToPipe);
+                    Debug.WriteLine($"Write to pipeServer {messageToPipe}");
                 }
                 catch (Exception ex)
                 {
