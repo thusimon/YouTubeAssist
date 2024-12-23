@@ -13,7 +13,7 @@ namespace CommonLibrary
             {
                 return null;
             }
-            return JsonSerializer.Deserialize<Message>(new string(buffer));
+            return DeserializedMessage(new string(buffer));
         }
 
         static public char[]? ReadStdInput()

@@ -70,11 +70,17 @@ btnAuth.addEventListener('click', async (evt) => {
   //btnAuth.disabled = true;
   setCaption(authStatus);
   setBtnAuthStatus(authStatus);
-  const authResult = await chrome.runtime.sendMessage(WEBEXT_GUID, {req: 'webapp-port-message', data: 'WebExt::Auth:request'});
+  const message = {
+    type: 'WEB_TO_SW',
+    action: 'AUTH',
+    data: {}
+  };
+  const authResponse = await chrome.runtime.sendMessage(WEBEXT_GUID, message);
 
-  if (authResult === 'WebExt::Auth:True') {
+  const {result} = authResponse;
+  if (result === 'True') {
     authStatus = 2
-  } else if (authResult === 'WebExt::Auth:False') {
+  } else if (result === 'False') {
     authStatus = 3
   }
   setCaption(authStatus);

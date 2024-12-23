@@ -64,7 +64,7 @@ try
     Message? message;
     while ((message = IOService.ReadMessage()) != null)
     {
-        Debug.WriteLine($"Get {message.type} from WebExt");
+        Debug.WriteLine($"Get {message.type}:{message.action} from WebExt");
 
         Task writePipeTask = Task.Run(() =>
         {

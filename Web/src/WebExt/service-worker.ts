@@ -19,7 +19,7 @@ const disposePort = () => {
     try {
       p.disconnect();
       p = null;
-      sendMessageToPop('PORT_DISPOSE', 'port disposed');
+      sendMessageToPop('PORT_DISPOSE', {message: 'port disposed'});
     } catch (e) {
       console.log(`Error: ${e.message}`);
     }
@@ -28,7 +28,7 @@ const disposePort = () => {
 
 const createPort = async () => {
   if (p) {
-    sendMessageToPop('PORT_CREATE', undefined, 'Port exists, can not re-create');
+    sendMessageToPop('PORT_CREATE', undefined, {message: 'Port exists, can not re-create'});
     return;
   }
   const port = new Port(HOST_NAME);
@@ -38,25 +38,24 @@ const createPort = async () => {
   const handlePortNativeMessage = (action, data, error) => {
     switch (action) {
       case 'AUTH': {
-        const UUID = data.UUID;
-        const authResult = data.result;
-        if (UUID) {
+        const {from, uuid} = data;
+        if (from === 'webapp') {
           // this is for WebApp
-          const deferred = promiseMap[UUID];
+          const deferred = promiseMap[uuid];
           if (deferred) {
-            deferred.resolve(authResult);
+            deferred.resolve(data);
           }
-          delete promiseMap[UUID];
+          delete promiseMap[uuid];
           return;
-        } else {
+        } else if (from === 'popup') {
           // this is for Popup
-          sendMessageToPop(action, authResult);
+          sendMessageToPop(action, data);
           return;
         }
       }
       case 'MESSAGE': {
         const message = data.message;
-        sendMessageToPop(action, `From Native: ${message}`);
+        sendMessageToPop(action, {message: `MSG From Native: ${message}`});
       }
     }
   }
@@ -71,33 +70,32 @@ const createPort = async () => {
       }
     }
   }); 
-  p.onDisconnect.addListener((msg) => {
-    console.log('disconnected', msg);
-    sendMessageToPop('PORT_CLOSE', undefined, msg);
+  p.onDisconnect.addListener((p) => {
+    console.log('disconnected', p);
+    const errorMessage = p.error?.message || chrome.runtime.lastError?.message
+    sendMessageToPop('PORT_CLOSE', undefined, {message: errorMessage});
   });
 
-  sendMessageToPop('PORT_CREATE', 'port created');
+  sendMessageToPop('PORT_CREATE', {message: 'port created'});
 };
 
-const messagePort = (message) => {
+const messagePort = (action, data) => {
   if (!p) {
-    sendMessageToPop('MESSAGE', 'no port, can not send message')
+    sendMessageToPop('MESSAGE', {message: 'no port, can not send message'})
     return;
   }
 
   const messageToNative = {
     type: 'EXT_TO_HOST',
-    action: 'MESSAGE',
-    // data to native must be a Dictionary<string, string>
-    data: {
-      message
-    }
+    action: action,
+    // data or error to native must be a Dictionary<string, string>
+    data: data
   }
   p.postMessage(messageToNative);
 }
 
 
-const handlePopUpMessage = (action, data, error) => {
+const handlePopUpMessage = (action, data) => {
   switch(action) {
     case 'PORT_CREATE':
       createPort();
@@ -106,17 +104,41 @@ const handlePopUpMessage = (action, data, error) => {
       disposePort();
       break;
     case 'MESSAGE':
-      messagePort(data);
+      messagePort(action, data);
+      break;
+    case 'AUTH':
+      messagePort(action, data);
       break;
     defaut:
       break;
   }
 }
+
+const handleWebMessage = (action, data, sender, sendResponse) => {
+  switch (action) {
+    case 'AUTH':
+      const tabId = sender?.tab?.id;
+      const url = sender?.url;
+      const uuid = `${url}-${tabId}`;
+      data.uuid = uuid;
+      data.from = 'webapp';
+      const deferred = Promise.withResolvers();
+      promiseMap[uuid] = deferred;
+      deferred.promise.then((result) => {
+        sendResponse(result);
+      });
+      messagePort(action, data);
+      break;
+    default:
+      break;
+  }
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const {type, action, data, error} = message;
+  const {type, action, data} = message;
   switch(type) {
     case 'POP_TO_SW':
-      handlePopUpMessage(action, data, error);
+      handlePopUpMessage(action, data);
       break;
     defaut:
       break;
@@ -124,19 +146,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
-  const {req, data} = message;
-  const tabId = sender?.tab?.id;
-  const origin = sender?.origin;
-  const uuid = `${tabId}-${origin}`
-  switch(req) {
-    case 'webapp-port-message': {
-      const dataExt = `${data}_${uuid}`
-      messagePort(dataExt);
-      const deferred = Promise.withResolvers();
-      promiseMap[uuid] = deferred;
-      deferred.promise.then((result) => {
-        sendResponse(result);
-      });
+  const {type, action, data} = message;
+  switch(type) {
+    case 'WEB_TO_SW': {
+      handleWebMessage(action, data, sender, sendResponse);
       return true;
     }
     defaut:

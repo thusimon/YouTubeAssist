@@ -61,12 +61,12 @@ portConnectBtnE.addEventListener('click', portControlClickHandler);
 portDisconnectBtnE.addEventListener('click', portControlClickHandler);
 
 btnToNativeE.addEventListener('click', () => {
-  const msg = textToNativeE.value;
+  const message = textToNativeE.value;
 
-  if (!msg) {
+  if (!message) {
     return;
   }
-  sendMessageToSW('MESSAGE', msg);
+  sendMessageToSW('MESSAGE', {message});
 });
 
 /**
@@ -84,8 +84,7 @@ btnAuth.addEventListener('click', (evt) => {
   authStatus = 1;
   //btnAuth.disabled = true;
   setBtnAuthStatus(authStatus);
-
-  sendMessageToSW('MESSAGE', 'WebExt::Auth:request') 
+  sendMessageToSW('AUTH', {from: 'popup', uuid: document.URL}); 
 })
 
 const setBtnAuthStatus = (authStatus) => {
@@ -119,13 +118,14 @@ const setBtnAuthStatus = (authStatus) => {
   }
 } 
 
-const handleMessage = (msg) => {
-  switch (msg) {
-    case 'WebExt::Auth:True':
+const handleAuthMessage = (authData) => {
+  const {result} = authData;
+  switch (result) {
+    case 'True':
       authStatus = 2
       setBtnAuthStatus(authStatus);
       break;
-    case 'WebExt::Auth:False':
+    case 'False':
       authStatus = 3
       setBtnAuthStatus(authStatus);
       break;
@@ -137,13 +137,13 @@ const handleMessage = (msg) => {
 const handleSWMessage = (action, data, error) => {
   switch(action) {
     case 'MESSAGE': {
-      log(data);
+      log(data.message);
       break;
     }
     case 'PORT_CREATE': {
       portConnectBtnE.disabled = true;
       if (error) {
-        log(error);
+        log(error.message);
       }
       break;
     }
@@ -152,6 +152,13 @@ const handleSWMessage = (action, data, error) => {
       break;
     }
     case 'PORT_CLOSE': {
+      if (error) {
+        log(error.message);
+      }
+      break;
+    }
+    case 'AUTH': {
+      handleAuthMessage(data);
       break;
     }
     defaut:

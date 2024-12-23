@@ -35,7 +35,7 @@ namespace YouTubeAssist.Services
 
                         Log($"Client connected on thread [{Thread.CurrentThread.ManagedThreadId}] as user {pipeServer.GetImpersonationUserName()}");
 
-                        messageHandler = new MessageHandler(pipeServer);
+                        messageHandler = new MessageHandler(pipeServer, pipeView);
 
                         // Read and process messages
                         // Start reading and processing messages
@@ -46,8 +46,9 @@ namespace YouTubeAssist.Services
                                 string message = reader.ReadLine();
                                 if (!string.IsNullOrEmpty(message))
                                 {
-                                    Log($"From WebExt: {message}");
-                                    messageHandler.handleMessage(message);
+                                    Log($"{message}", false);
+                                    Message? messageObj = IOService.DeserializedMessage(message);
+                                    messageHandler.handleMessage(messageObj);
                                 }
                             }
                             Log("pipeServer is disconnected");
