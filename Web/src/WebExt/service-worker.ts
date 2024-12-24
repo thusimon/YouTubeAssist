@@ -5,9 +5,15 @@ let p = null;
 const HOST_NAME='com.utticus.youtube.assist.host';
 const promiseMap = {};
 
+type MessageType = {
+  type: string; // direction of the message, e.g POPUP_TO_SW(Serive Worker), NATIVE_TO_HOST, HOST_TO_SW
+  action: string; // purpose of the message, e.g MESSAGE, AUTH
+  data?: { [key: string]: string; }; // data of the message, optional
+  error?: { [key: string]: string; }; // error of the message, optional
+}
 
-const sendMessageToPop = (action, data = undefined, error = undefined) => {
-  const message = {
+const sendMessageToPop = (action, data = undefined) => {
+  const message: MessageType = {
     type: 'SW_TO_POP',
     action,
     data,
@@ -134,7 +140,7 @@ const handleWebMessage = (action, data, sender, sendResponse) => {
   }
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message: MessageType, sender, sendResponse) => {
   const {type, action, data} = message;
   switch(type) {
     case 'POP_TO_SW':
@@ -145,7 +151,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessageExternal.addListener((message: MessageType, sender, sendResponse) => {
   const {type, action, data} = message;
   switch(type) {
     case 'WEB_TO_SW': {

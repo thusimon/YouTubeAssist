@@ -120,6 +120,7 @@ const setBtnAuthStatus = (authStatus) => {
 
 const handleAuthMessage = (authData) => {
   const {result} = authData;
+  log(`AUTH from Native: ${result}`);
   switch (result) {
     case 'True':
       authStatus = 2
