@@ -20,7 +20,7 @@ participant WebExt_Host as WebExt Host(StdIO)
 participant Native
 
 alt WebExt Popup open or click connect button
-WebExt_SW ->> WebExt_Host: Invoke broker
+WebExt_SW ->> WebExt_Host: Invoke native Host
 Note over WebExt_SW,WebExt_Host: Port created
 WebExt_Host ->> Native: Establish IPC
 Note over WebExt_Host, Native: NamedPipeStream created
@@ -28,7 +28,7 @@ end
 
 alt Message flow
 External ->> WebExt_SW: Send JSON message
-WebExt_SW ->> WebExt_Host: Post JSON message<br>to broker
+WebExt_SW ->> WebExt_Host: Post JSON message<br>to native host
 Note over WebExt_Host: Read message from StdIO
 WebExt_Host ->> Native: Write message string to pipe
 Note over Native: Read message from pipe<br>And handle message

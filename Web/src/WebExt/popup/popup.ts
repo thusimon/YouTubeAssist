@@ -176,7 +176,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// create port when page is opened
+// create port when popup is opened
 sendMessageToSW('PORT_CREATE');
 
 console.log('popup opened');
