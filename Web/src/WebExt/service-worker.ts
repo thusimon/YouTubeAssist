@@ -12,11 +12,12 @@ type MessageType = {
   error?: { [key: string]: string; }; // error of the message, optional
 }
 
-const sendMessageToPop = (action, data = undefined) => {
+const sendMessageToPop = (action, data = undefined, error = undefined) => {
   const message: MessageType = {
     type: 'SW_TO_POP',
     action,
     data,
+    error
   };
   chrome.runtime.sendMessage(message);
 }
