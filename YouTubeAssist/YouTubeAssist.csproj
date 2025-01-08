@@ -9,20 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="App.Secrets.config" />
-    <None Remove="Assets\Images\icon_256x256.ico" />
-    <None Remove="Assets\Images\loading_200.png" />
-    <None Remove="Assets\Images\no_result_256.png" />
-    <None Remove="Assets\Images\profile_holder_350.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="App.Secrets.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="Assets\Images\icon_256x256.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -60,6 +46,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="App.Secrets.config">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

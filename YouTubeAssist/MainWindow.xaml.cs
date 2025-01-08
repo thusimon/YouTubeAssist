@@ -31,7 +31,7 @@ namespace YouTubeAssist
             notificationsView = new NotificationsView();
             aboutView = new AboutView();
             pipeView = new PipeView();
-            MainContentControl.Content = pipeView;
+            MainContentControl.Content = searchView;
         }
 
         private void Search_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -47,6 +47,11 @@ namespace YouTubeAssist
         private void About_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             MainContentControl.Content = aboutView;
+        }
+
+        private void Pipes_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MainContentControl.Content = pipeView;
         }
     }
 }

@@ -46,6 +46,12 @@ Open the `YouTubeAssist.sln` in visual studio and build the solution
 
 ### YoutubeAssist WPF
 This project need windows 11 SDK(10.0.26100.0), which can be installed from visual studio installer -> Individual components
+* Please create a `App.Secrets.config` file at the same level of the `App.config`, the content is
+  ```
+  <appSettings>
+    <add key="ApiKey" value="Youtube data API key" />
+  </appSettings>
+  ```
 
 ### ClientHost console
 This app will use a `post-build.bat` file to write registry key according to this [browser extension nativeMessaging documentation](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location)
