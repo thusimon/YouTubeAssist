@@ -6,7 +6,24 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <AssemblyName>YouTubeAssist</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Assets\Images\loading_200.png" />
+    <Content Remove="Assets\Images\no_result_256.png" />
+    <Content Remove="Assets\Images\profile_holder_350.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="App.Secrets.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="App.Secrets.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Images\icon_256x256.ico">
@@ -41,17 +58,10 @@
   <ItemGroup>
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3624" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
-    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="App.Secrets.config">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
