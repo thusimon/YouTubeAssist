@@ -3,12 +3,11 @@ using System.Windows.Data;
 
 namespace YouTubeAssist.UI.Utils
 {
-    class NullImageUrlConverter : IValueConverter
+    public class TextToBoolConverter : IValueConverter
     {
-        private readonly Uri profileUri = new Uri("pack://application:,,,/Assets/Images/profile_holder_350.png");
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value ?? profileUri;
+            return !string.IsNullOrWhiteSpace(value as string);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

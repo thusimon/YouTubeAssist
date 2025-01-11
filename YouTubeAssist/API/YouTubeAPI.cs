@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-
-using Google.Apis.Auth.OAuth2;
+using Google;
 using Google.Apis.Services;
-using Google.Apis.Upload;
-using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
-using Newtonsoft.Json.Serialization;
 
 namespace YouTubeAssist.API
 {
@@ -62,9 +52,9 @@ namespace YouTubeAssist.API
 
             Tuple<List<string>, List<string>, List<string>> result = Tuple.Create(videos, channels, playlists);
 
-            Trace.WriteLine(String.Format("Videos:\n{0}\n", string.Join("\n", videos)));
-            Trace.WriteLine(String.Format("Channels:\n{0}\n", string.Join("\n", channels)));
-            Trace.WriteLine(String.Format("Playlists:\n{0}\n", string.Join("\n", playlists)));
+            Debug.WriteLine($"Videos:\n{string.Join("\n", videos)}\n");
+            Debug.WriteLine($"Channels:\n{string.Join("\n", channels)}\n");
+            Debug.WriteLine($"Playlists:\n{string.Join("\n", playlists)}\n");
 
             return result;
         }
@@ -75,7 +65,17 @@ namespace YouTubeAssist.API
             channelListRequest.ForHandle = handleName;
             channelListRequest.MaxResults = 1;
 
-            ChannelListResponse channelListResponse = await channelListRequest.ExecuteAsync();
+            ChannelListResponse? channelListResponse = null;
+            try
+            {
+                channelListResponse = await channelListRequest.ExecuteAsync();
+            }
+            catch (GoogleApiException e)
+            {
+                Debug.WriteLine(e.Message);
+                return null;
+            }
+            
 
             if (channelListResponse == null || channelListResponse.Items == null)
             {

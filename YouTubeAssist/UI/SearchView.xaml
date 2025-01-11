@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <localUtils:NullStringConverter x:Key="UINullStringConverter" />
         <localUtils:NullImageUrlConverter x:Key="UINullImageUrlConverter" />
+        <localUtils:TextToBoolConverter x:Key="TextToBoolConverter" />
         <DataTemplate x:Key="NoResultTemplate">
             <local:NoResult />
         </DataTemplate>
@@ -51,7 +52,8 @@
         <StackPanel Grid.Column="0">
             <Label x:Name="search_label" Content="Channel Handle:" />
             <TextBox x:Name="search_textBox" Style="{StaticResource BaseTextBoxStyle}" AutomationProperties.LabeledBy="{Binding ElementName=search_label}" TextWrapping="Wrap" Text="" HorizontalAlignment="Center" Width="150"/>
-            <Button x:Name="search_button" Style="{StaticResource BaseButtonStyle}" Content="_Search" Click="Search_button_Click" HorizontalAlignment="Center" />
+            <Button x:Name="search_button" Style="{StaticResource BaseButtonStyle}" Content="_Search" Click="Search_button_Click" HorizontalAlignment="Center"
+                    IsEnabled="{Binding ElementName=search_textBox, Path=Text, Converter={StaticResource TextToBoolConverter}}"/>
         </StackPanel>
         <StackPanel Grid.Column="1">
             <ContentControl>
