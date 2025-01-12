@@ -120,6 +120,8 @@ namespace YouTubeAssist.API
                 channelResult.Statistics.ViewCount ?? 0,
                 channelResult.Statistics.VideoCount ?? 0);
             channel.Date = channelResult.Snippet.PublishedAtDateTimeOffset;
+
+            Debug.WriteLine(channel.ToString());
             return channel;
         }
 

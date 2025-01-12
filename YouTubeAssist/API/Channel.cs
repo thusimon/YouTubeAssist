@@ -1,4 +1,6 @@
-﻿namespace YouTubeAssist.API
+﻿using System.Text;
+
+namespace YouTubeAssist.API
 {
     public class Channel
     {
@@ -60,5 +62,22 @@
             _viewCount = viewCount;
             _videoCount = videoCount;
         }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("{")
+                .AppendLine($"  ID: {ID},")
+                .AppendLine($"  Title: {Title},")
+                .AppendLine($"  Description: {Description},")
+                .AppendLine($"  CustomUrl: {CustomUrl?.ToString()},")
+                .AppendLine($"  ThumbUrl: {ThumbUrl?.ToString()},")
+                .AppendLine($"  Date: {Date?.ToString("MM/dd/yyyy HH:mm:ss")},")
+                .AppendLine($"  ViewCount: {ViewCount},")
+                .AppendLine($"  VideoCount: {VideoCount}")
+                .AppendLine("}");
+            return stringBuilder.ToString();
+        }
+
     }
 }
