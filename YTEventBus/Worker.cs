@@ -34,7 +34,7 @@ namespace YTEventBus
                 {
                     _logger.LogError(ex, "An error occurred while checking processes.");
                 }
-                await Task.Delay(30000, stoppingToken);
+                await Task.Delay(60000, stoppingToken);
             }
         }
     }

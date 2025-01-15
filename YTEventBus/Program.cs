@@ -5,16 +5,16 @@ var builder = Host.CreateDefaultBuilder(args)
     {
         options.ServiceName = "YTEventBusService";
     })
-    .ConfigureServices(services =>
-    {
-        services.AddHostedService<Worker>();
-    })
     .ConfigureLogging(logging =>
     {
         logging.ClearProviders() 
-        .AddEventLog() // Add EventLog provider (inly for windos)
+        .AddEventLog() // Add EventLog provider (only for windos)
         .AddConsole() // Add Console provider (for debugging)
         .SetMinimumLevel(LogLevel.Information);
+    })
+    .ConfigureServices(services =>
+    {
+        services.AddHostedService<Worker>();
     });
 
 var host = builder.Build();
